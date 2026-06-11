@@ -68,8 +68,17 @@ STATIC_EXPORT=true npm run build
 
 ## デプロイ
 
-- **Railway / Vercel（サーバーモード）**: リポジトリを接続し `npm run build` → `npm run start` を実行するだけで動作します。環境変数の設定は不要です。
-- **Cloudflare Pages（静的）**: ビルドコマンドを `STATIC_EXPORT=true npm run build`、出力ディレクトリを `out` に設定してください。詳細手順は下記参照。
+本番環境は **Cloudflare Pages**（静的）のみです。
+
+- ビルドコマンド: `STATIC_EXPORT=true npm run build`
+- 出力ディレクトリ: `out`
+
+CLIから手動デプロイする場合:
+
+```bash
+STATIC_EXPORT=true npm run build
+npx wrangler pages deploy out --project-name fitframe
+```
 
 ## 動作確認手順（E2E）
 
