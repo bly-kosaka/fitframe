@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FitFrame
 
-## Getting Started
+複数の画像を指定サイズへ一括フィット（リサイズ／トリミング）し、ZIPでまとめてダウンロードできる画像加工ツールです。
+**処理はすべてブラウザ内（Canvas + JSZip）で完結し、画像が外部サーバーへ送信されることはありません。**
 
-First, run the development server:
+## 概要
+
+- アップロード → サイズ・形状・出力形式の設定 → 自動配置結果の確認・個別調整 → ZIPダウンロード、という単一画面のウィザード形式です。
+- Cover / Contain / Stretchの3種のフィットモードと、四角・角丸・円・楕円の4種の出力形状（マスク）に対応します。
+- 画像ごとに位置・拡大率・回転・反転・出力ファイル名を個別調整できます。
+- 出力時にEXIF等のメタデータは常に削除されます（Canvas再エンコードによる再生成）。
+
+## 機能
+
+| 画面 | 内容 |
+|---|---|
+| アップロード | ドラッグ&ドロップ／ファイル選択で画像を追加。サンプル画像で試すことも可能 |
+| サイズ設定 | 出力サイズ（プリセット／カスタム）、フィットモード、出力形状・角丸、出力形式（JPG/PNG/WebP）・画質、背景色、ファイル名ルールを設定 |
+| 配置の確認 | 全画像の自動配置結果をグリッド／リスト表示。個別編集・リセット・削除・追加が可能 |
+| 個別編集 | 1枚ずつ位置（ドラッグ）・拡大率（ホイール／スライダー）・回転・反転・出力ファイル名を調整 |
+| ダウンロード | 設定内容の要約を確認し、ZIPを生成してダウンロード。書き出し進捗と完了後のサムネイル一覧を表示 |
+
+## 制限値（バリデーション）
+
+- 対応形式: JPEG / PNG / WebP（GIF等は非対応）
+- 1ファイルあたり最大20MB
+- 画像の最大サイズ: 10000 × 10000 px
+- 合計アップロード枚数: 最大100枚
+
+これらを超えるファイルはエラーとして表示され、それ以外の正常なファイルのみ処理が継続されます。
+
+## 技術構成
+
+- [Next.js](https://nextjs.org/)（App Router）/ React / TypeScript（strict mode）
+- Tailwind CSS（デザイントークンベース）
+- [react-dropzone](https://react-dropzone.js.org/)（アップロード）
+- [JSZip](https://stuk.github.io/jszip/)（ZIP生成）
+- 画像処理はCanvas 2D API（`src/lib/fit.ts` に集約した単一の描画エンジンを、サムネイル・プレビュー・編集・書き出しの全画面で共有）
+
+## セットアップ
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[http://localhost:3000](http://localhost:3000) を開いてください。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ビルド
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+このアプリは画像処理を含めサーバー機能（API Routes / Server Actions / 環境変数）を一切使用しません。
+静的ホスティングへ配信する場合は `next.config.mjs` に `output: "export"` を追加して `npm run build` を実行し、生成された `out/` ディレクトリを配信してください。
 
-To learn more about Next.js, take a look at the following resources:
+## デプロイ
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Vercel（推奨）**: リポジトリを接続するだけでビルド・デプロイ可能です。環境変数の設定は不要です。
+- **静的ホスティング**（Netlify, Cloudflare Pages, GitHub Pages等）: 上記の `output: "export"` で静的書き出しした `out/` ディレクトリをそのまま配信してください。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 動作確認手順（E2E）
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. `npm run dev` でアプリを起動し、トップページを開く。
+2. アップロード画面で「サンプル画像で試す」を選択し、サンプル画像を読み込む。または手元のJPG/PNG/WebP画像をドラッグ&ドロップする。
+3. サイズ設定画面で出力サイズ・フィットモード・形状・出力形式を設定し、「確認へ進む」を選択する。
+4. 配置の確認画面で自動配置結果を確認し、必要に応じて画像をクリックして個別編集画面で位置・拡大率・回転・反転・ファイル名を調整する。
+5. 「ダウンロードへ進む」からダウンロード画面へ遷移し、「ZIPを生成してダウンロード」を選択する。
+6. 進捗表示後にZIPファイルがダウンロードされ、完了画面に書き出し結果のサムネイルが表示されることを確認する。
