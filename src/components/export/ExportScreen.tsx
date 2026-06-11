@@ -5,6 +5,7 @@ import { Icon } from "@/components/ui/Icon";
 import { useExport } from "@/hooks/useExport";
 import { useImageStore } from "@/hooks/useImageStore";
 import { useToasts } from "@/hooks/useToasts";
+import { ZIP_SIZE_WARNING_BYTES } from "@/lib/constants";
 import { estimateBytes, formatBytes } from "@/lib/format";
 
 import { ExportSummary } from "./ExportSummary";
@@ -19,6 +20,7 @@ export function ExportScreen() {
   const { phase, done, results, start, redownload } = useExport(images, settings, pushToast);
 
   const totalEst = images.length * estimateBytes(settings);
+  const isLargeExport = totalEst > ZIP_SIZE_WARNING_BYTES;
   const pct = images.length ? Math.round((done / images.length) * 100) : 0;
   const totalBytes = results.reduce((sum, r) => sum + r.bytes, 0);
 
@@ -41,6 +43,11 @@ export function ExportScreen() {
               <p className="mono-num mb-[22px] text-xs text-text-3">
                 推定合計サイズ 約 {formatBytes(totalEst)}
               </p>
+              {isLargeExport && (
+                <p className="mb-[22px] -mt-[14px] rounded-md bg-warn-weak px-3 py-2 text-left text-xs leading-[1.6] text-warn">
+                  出力サイズの合計が大きいため、ZIP生成に時間がかかったり、ブラウザの負荷が高くなる場合があります。枚数や出力サイズを減らすことをおすすめします。
+                </p>
+              )}
               <Button variant="primary" size="lg" className="w-full" onClick={start}>
                 <Icon name="download" size={18} />
                 ZIPを生成してダウンロード

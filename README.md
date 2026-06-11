@@ -54,12 +54,22 @@ npm run start
 ```
 
 このアプリは画像処理を含めサーバー機能（API Routes / Server Actions / 環境変数）を一切使用しません。
-静的ホスティングへ配信する場合は `next.config.mjs` に `output: "export"` を追加して `npm run build` を実行し、生成された `out/` ディレクトリを配信してください。
+
+### 静的書き出し（Cloudflare Pages 等）
+
+`STATIC_EXPORT=true` を指定してビルドすると `next.config.mjs` が `output: "export"` になり、`out/` ディレクトリに完全な静的サイトが生成されます。
+
+```bash
+STATIC_EXPORT=true npm run build
+```
+
+セキュリティヘッダー（CSP等）は通常モードでは `next.config.mjs` の `headers()` で付与されますが、
+静的書き出しでは `headers()` が無効になるため、代わりに `public/_headers`（Cloudflare Pages形式）が `out/_headers` としてそのまま出力されます。
 
 ## デプロイ
 
-- **Vercel（推奨）**: リポジトリを接続するだけでビルド・デプロイ可能です。環境変数の設定は不要です。
-- **静的ホスティング**（Netlify, Cloudflare Pages, GitHub Pages等）: 上記の `output: "export"` で静的書き出しした `out/` ディレクトリをそのまま配信してください。
+- **Railway / Vercel（サーバーモード）**: リポジトリを接続し `npm run build` → `npm run start` を実行するだけで動作します。環境変数の設定は不要です。
+- **Cloudflare Pages（静的）**: ビルドコマンドを `STATIC_EXPORT=true npm run build`、出力ディレクトリを `out` に設定してください。詳細手順は下記参照。
 
 ## 動作確認手順（E2E）
 

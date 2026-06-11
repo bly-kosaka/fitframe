@@ -47,5 +47,11 @@ export const TOAST_DURATION_MS = 2600;
 // ---------- ファイル名 ----------
 export const FORBIDDEN_FILENAME_CHARS = /[\\/:*?"<>|]/g;
 
+// ---------- メモリ安全性に関する警告閾値 ----------
+// デコード後のビットマップ合計（width × height × 4byte）がこれを超えたら警告する
+export const DECODED_MEMORY_WARNING_BYTES = 1.5 * 1024 * 1024 * 1024; // 約1.5GB
+// 出力ZIPの推定合計サイズがこれを超えたら警告する
+export const ZIP_SIZE_WARNING_BYTES = 500 * 1024 * 1024; // 500MB
+
 // ---------- サンプル画像 ----------
 export const DEMO_IMAGE_COUNT = 8;

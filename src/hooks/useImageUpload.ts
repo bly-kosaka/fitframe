@@ -7,7 +7,9 @@
 
 import { useCallback, useState } from "react";
 
+import { DECODED_MEMORY_WARNING_BYTES } from "@/lib/constants";
 import { createDemoImages } from "@/lib/demo";
+import { formatBytes } from "@/lib/format";
 import type { RejectedFile } from "@/lib/types";
 import { processFiles } from "@/lib/validate";
 
@@ -39,6 +41,18 @@ export function useImageUpload(): UseImageUploadResult {
       if (accepted.length > 0) {
         addImages(accepted);
         pushToast(`${accepted.length} 枚を読み込みました`);
+
+        const totalDecodedBytes = [...state.images, ...accepted].reduce(
+          (sum, img) => sum + img.naturalWidth * img.naturalHeight * 4,
+          0,
+        );
+        if (totalDecodedBytes > DECODED_MEMORY_WARNING_BYTES) {
+          pushToast(
+            `画像データの合計が約${formatBytes(totalDecodedBytes)}に達しています。枚数や解像度を減らすとブラウザが安定します。`,
+            "warn",
+          );
+        }
+
         goToStep("settings", true);
         return;
       }
@@ -46,7 +60,7 @@ export function useImageUpload(): UseImageUploadResult {
         pushToast("読み込める画像がありませんでした", "warn");
       }
     },
-    [state.images.length, addImages, pushToast, goToStep],
+    [state.images, addImages, pushToast, goToStep],
   );
 
   const handleDemo = useCallback(async () => {

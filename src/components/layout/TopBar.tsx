@@ -36,6 +36,10 @@ export function TopBar() {
       <Stepper step={state.step} maxStep={maxStep} onNavigate={goToStep} />
 
       <div className="flex items-center gap-3">
+        <Pill variant="ok" className="hidden sm:inline-flex">
+          <Icon name="lock" size={12} />
+          ローカル処理
+        </Pill>
         {state.images.length > 0 && (
           <Pill variant="neutral" className="tnum">
             <Icon name="image" size={12} />
