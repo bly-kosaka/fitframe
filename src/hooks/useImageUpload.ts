@@ -7,6 +7,7 @@
 
 import { useCallback, useState } from "react";
 
+import { trackEvent } from "@/lib/analytics";
 import { DECODED_MEMORY_WARNING_BYTES } from "@/lib/constants";
 import { createDemoImages } from "@/lib/demo";
 import { formatBytes } from "@/lib/format";
@@ -39,6 +40,9 @@ export function useImageUpload(): UseImageUploadResult {
       setRejectedFiles(rejected);
 
       if (accepted.length > 0) {
+        if (state.images.length === 0) {
+          trackEvent("resize_upload_start", { image_count: accepted.length, source: "file" });
+        }
         addImages(accepted);
         pushToast(`${accepted.length} 枚を読み込みました`);
 
@@ -67,10 +71,13 @@ export function useImageUpload(): UseImageUploadResult {
     setIsProcessing(true);
     const items = await createDemoImages();
     setIsProcessing(false);
+    if (state.images.length === 0) {
+      trackEvent("resize_upload_start", { image_count: items.length, source: "demo" });
+    }
     addImages(items);
     pushToast(`サンプル ${items.length} 枚を読み込みました`);
     goToStep("settings", true);
-  }, [addImages, pushToast, goToStep]);
+  }, [addImages, pushToast, goToStep, state.images.length]);
 
   const dismissRejected = useCallback(() => setRejectedFiles([]), []);
 

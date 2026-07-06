@@ -8,6 +8,7 @@
 
 import { useCallback, useState } from "react";
 
+import { trackEvent } from "@/lib/analytics";
 import { exportSingle, exportZip, triggerDownload } from "@/lib/download";
 import type { ExportPhase, ExportResult, ImageItem, OutputSettings, ToastKind } from "@/lib/types";
 
@@ -49,11 +50,23 @@ export function useExport(
         setOutput({ blob, name });
         setPhase("done");
         pushToast("画像をダウンロードしました");
+        trackEvent("resize_export_complete", {
+          image_count: images.length,
+          is_zip: false,
+          format: settings.format,
+          fit_mode: settings.fit,
+        });
       } else {
         const { zipBlob, zipName } = await exportZip(images, settings, { onProgress });
         setOutput({ blob: zipBlob, name: zipName });
         setPhase("done");
         pushToast("ZIPをダウンロードしました");
+        trackEvent("resize_export_complete", {
+          image_count: images.length,
+          is_zip: true,
+          format: settings.format,
+          fit_mode: settings.fit,
+        });
       }
     } catch {
       setPhase("ready");
