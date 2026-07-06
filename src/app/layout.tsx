@@ -14,10 +14,30 @@ const outfit = Outfit({
   display: "swap",
 });
 
+const SITE_URL = "https://fitframe.pages.dev";
+const OGP_TITLE = "FitFrame — 画像一括リサイズツール";
+const OGP_DESCRIPTION =
+  "複数画像を指定サイズへ一括フィットし、ZIPでまとめてダウンロード。すべてブラウザ内で完結し、画像はサーバーに送信されません。";
+
 export const metadata: Metadata = {
-  title: "FitFrame — 画像一括リサイズツール",
-  description:
-    "複数画像を指定サイズへ一括フィットし、ZIPでまとめてダウンロード。すべてブラウザ内で完結し、画像はサーバーに送信されません。",
+  metadataBase: new URL(SITE_URL),
+  title: OGP_TITLE,
+  description: OGP_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    siteName: "FitFrame",
+    title: OGP_TITLE,
+    description: OGP_DESCRIPTION,
+    locale: "ja_JP",
+    images: [{ url: "/ogp.png", width: 1536, height: 1024, alt: OGP_TITLE }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: OGP_TITLE,
+    description: OGP_DESCRIPTION,
+    images: ["/ogp.png"],
+  },
 };
 
 export default function RootLayout({
