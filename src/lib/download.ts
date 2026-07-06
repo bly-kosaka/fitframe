@@ -45,10 +45,34 @@ export interface ExportOptions {
   onProgress?: (done: number, total: number, result: ExportResult) => void;
 }
 
+export interface ExportSingleResult {
+  result: ExportResult;
+  blob: Blob;
+  name: string;
+}
+
 export interface ExportZipResult {
   results: ExportResult[];
   zipBlob: Blob;
   zipName: string;
+}
+
+/** 1枚を直接ダウンロードする（ZIP なし） */
+export async function exportSingle(
+  items: ImageItem[],
+  settings: OutputSettings,
+  options: ExportOptions = {},
+): Promise<ExportSingleResult> {
+  const names = resolveFileNames(items, settings);
+  const canvas = document.createElement("canvas");
+  renderToCanvas(canvas, items[0].element, settings, items[0].transform);
+  const blob = await canvasToBlob(canvas, settings);
+  const name = names[0];
+  const result: ExportResult = { id: items[0].id, name, bytes: blob.size };
+  options.onProgress?.(1, 1, result);
+  await nextFrame();
+  triggerDownload(blob, name);
+  return { result, blob, name };
 }
 
 /** 全画像を出力解像度で描画し、ZIP にまとめてダウンロードする */

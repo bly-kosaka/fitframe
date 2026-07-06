@@ -58,7 +58,7 @@ export function Dropzone({ onFiles, onDemo, big = false }: DropzoneProps) {
         {isDragActive ? "ここにドロップ" : "画像をドラッグ＆ドロップ"}
       </div>
       <div className="mb-4 text-[13.5px] text-text-3">
-        またはクリックしてファイルを選択　・　複数枚まとめてOK
+        またはクリックしてファイルを選択 ・ 複数枚まとめてOK ・ ペースト可
       </div>
       <div className="mb-5 flex gap-[7px]">
         {FORMAT_LABELS.map((f) => (

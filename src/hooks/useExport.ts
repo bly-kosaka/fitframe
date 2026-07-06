@@ -8,13 +8,14 @@
 
 import { useCallback, useState } from "react";
 
-import { exportZip, triggerDownload } from "@/lib/download";
+import { exportSingle, exportZip, triggerDownload } from "@/lib/download";
 import type { ExportPhase, ExportResult, ImageItem, OutputSettings, ToastKind } from "@/lib/types";
 
 export interface UseExportResult {
   phase: ExportPhase;
   done: number;
   results: ExportResult[];
+  isSingle: boolean;
   start: () => Promise<void>;
   redownload: () => void;
 }
@@ -27,33 +28,42 @@ export function useExport(
   const [phase, setPhase] = useState<ExportPhase>("ready");
   const [done, setDone] = useState(0);
   const [results, setResults] = useState<ExportResult[]>([]);
-  const [zip, setZip] = useState<{ blob: Blob; name: string } | null>(null);
+  const [output, setOutput] = useState<{ blob: Blob; name: string } | null>(null);
+
+  const isSingle = images.length === 1;
 
   const start = useCallback(async () => {
     setPhase("processing");
     setDone(0);
     setResults([]);
-    setZip(null);
+    setOutput(null);
+
+    const onProgress = (doneCount: number, _total: number, result: ExportResult) => {
+      setDone(doneCount);
+      setResults((prev) => [...prev, result]);
+    };
 
     try {
-      const { zipBlob, zipName } = await exportZip(images, settings, {
-        onProgress: (doneCount, _total, result) => {
-          setDone(doneCount);
-          setResults((prev) => [...prev, result]);
-        },
-      });
-      setZip({ blob: zipBlob, name: zipName });
-      setPhase("done");
-      pushToast("ZIPをダウンロードしました");
+      if (isSingle) {
+        const { blob, name } = await exportSingle(images, settings, { onProgress });
+        setOutput({ blob, name });
+        setPhase("done");
+        pushToast("画像をダウンロードしました");
+      } else {
+        const { zipBlob, zipName } = await exportZip(images, settings, { onProgress });
+        setOutput({ blob: zipBlob, name: zipName });
+        setPhase("done");
+        pushToast("ZIPをダウンロードしました");
+      }
     } catch {
       setPhase("ready");
-      pushToast("ZIPの生成に失敗しました", "warn");
+      pushToast(isSingle ? "画像の書き出しに失敗しました" : "ZIPの生成に失敗しました", "warn");
     }
-  }, [images, settings, pushToast]);
+  }, [images, settings, pushToast, isSingle]);
 
   const redownload = useCallback(() => {
-    if (zip) triggerDownload(zip.blob, zip.name);
-  }, [zip]);
+    if (output) triggerDownload(output.blob, output.name);
+  }, [output]);
 
-  return { phase, done, results, start, redownload };
+  return { phase, done, results, isSingle, start, redownload };
 }
