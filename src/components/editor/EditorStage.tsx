@@ -19,6 +19,8 @@ interface DragState {
   y: number;
   ox: number;
   oy: number;
+  shift: boolean;
+  axis: "x" | "y" | null; // Shift モード時に最初の動きで確定する固定軸
 }
 
 const ZOOM_WHEEL_FACTOR = 1.06;
@@ -32,17 +34,28 @@ export function EditorStage({ item, settings, onTransform }: EditorStageProps) {
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (!frame) return;
     e.currentTarget.setPointerCapture(e.pointerId);
-    dragRef.current = { x: e.clientX, y: e.clientY, ox: t.x, oy: t.y };
+    dragRef.current = { x: e.clientX, y: e.clientY, ox: t.x, oy: t.y, shift: e.shiftKey, axis: null };
   };
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
     if (!drag || !frame) return;
     const k = 1 / frame.scale;
-    onTransform({
-      x: drag.ox + (e.clientX - drag.x) * k,
-      y: drag.oy + (e.clientY - drag.y) * k,
-    });
+    const dx = (e.clientX - drag.x) * k;
+    const dy = (e.clientY - drag.y) * k;
+
+    if (drag.shift) {
+      // 4px 動いた時点で軸を確定する
+      if (drag.axis === null) {
+        const adx = Math.abs(e.clientX - drag.x);
+        const ady = Math.abs(e.clientY - drag.y);
+        if (adx > 4 || ady > 4) drag.axis = adx >= ady ? "x" : "y";
+      }
+      if (drag.axis === "x") onTransform({ x: drag.ox + dx, y: drag.oy });
+      else if (drag.axis === "y") onTransform({ x: drag.ox, y: drag.oy + dy });
+    } else {
+      onTransform({ x: drag.ox + dx, y: drag.oy + dy });
+    }
   };
 
   const onPointerUp = (e: PointerEvent<HTMLDivElement>) => {
@@ -91,7 +104,7 @@ export function EditorStage({ item, settings, onTransform }: EditorStageProps) {
       )}
       <div className="pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-[7px] rounded-full bg-[rgba(21,24,30,0.82)] px-3.5 py-[7px] text-xs font-medium text-white backdrop-blur-[4px]">
         <Icon name="move" size={13} />
-        ドラッグで移動 ・ ホイールで拡大縮小 ・ ダブルクリックで中央へ
+        ドラッグで移動 ・ Shiftで軸固定 ・ ホイールで拡大縮小 ・ ダブルクリックで中央へ
       </div>
     </div>
   );
