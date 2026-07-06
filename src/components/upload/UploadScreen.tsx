@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 import { useImageUpload } from "@/hooks/useImageUpload";
+import { useToasts } from "@/hooks/useToasts";
 
 import { Dropzone } from "./Dropzone";
 import { RejectedList } from "./RejectedList";
@@ -13,6 +14,35 @@ import { ValueProps } from "./ValueProps";
 export function UploadScreen() {
   const { rejectedFiles, isProcessing, handleFiles, handleDemo, dismissRejected } =
     useImageUpload();
+  const { pushToast } = useToasts();
+
+  const handleClipboard = useCallback(async () => {
+    if (!navigator.clipboard?.read) {
+      pushToast("このブラウザではクリップボードペーストに対応していません", "warn");
+      return;
+    }
+    try {
+      const clipItems = await navigator.clipboard.read();
+      const files: File[] = [];
+      for (const item of clipItems) {
+        for (const type of item.types) {
+          if (type.startsWith("image/")) {
+            const blob = await item.getType(type);
+            const ext = type.split("/")[1] ?? "png";
+            files.push(new File([blob], `clipboard.${ext}`, { type }));
+            break;
+          }
+        }
+      }
+      if (files.length === 0) {
+        pushToast("クリップボードに画像がありません", "warn");
+        return;
+      }
+      handleFiles(files);
+    } catch {
+      pushToast("クリップボードへのアクセスが拒否されました", "warn");
+    }
+  }, [handleFiles, pushToast]);
 
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
@@ -52,7 +82,7 @@ export function UploadScreen() {
       </div>
 
       <div className="mb-[30px]">
-        <Dropzone onFiles={handleFiles} onDemo={handleDemo} big />
+        <Dropzone onFiles={handleFiles} onDemo={handleDemo} onClipboard={handleClipboard} big />
         {isProcessing && <p className="mt-3 text-center text-[12.5px] text-text-3">読み込み中…</p>}
       </div>
 

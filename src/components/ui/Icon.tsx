@@ -44,6 +44,8 @@ const ICONS = {
   warning: "M12 3l9.5 17H2.5L12 3z|M12 10v4M12 17h.01",
   fileImage: "M6 3h8l4 4v14H6z|M14 3v4h4|M9 12.5a1 1 0 100-2 1 1 0 000 2zM7 17l3-3 2 2 3-4 3 5z",
   link: "M9 14a4 4 0 015.6 0l2-2a4 4 0 00-5.6-5.6L10 8|M15 10a4 4 0 01-5.6 0l-2 2a4 4 0 005.6 5.6L14 16",
+  clipboard:
+    "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2",
 } as const;
 
 export type IconName = keyof typeof ICONS;

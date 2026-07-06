@@ -33,7 +33,8 @@ const nextConfig = {
 
 // `headers()` は `output: "export"` と併用できないため、
 // 静的書き出し時は public/_headers (Cloudflare Pages) 側で同等の設定を行う。
-if (!isStaticExport) {
+// 開発モードでは webpack HMR が eval() を使うため CSP を適用しない。
+if (!isStaticExport && process.env.NODE_ENV !== "development") {
   nextConfig.headers = async () => [
     {
       source: "/(.*)",

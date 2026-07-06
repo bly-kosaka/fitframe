@@ -16,11 +16,12 @@ const FORMAT_LABELS = ["JPG", "PNG", "WebP"];
 export interface DropzoneProps {
   onFiles: (files: File[]) => void;
   onDemo: () => void;
+  onClipboard: () => void;
   big?: boolean;
 }
 
 /** ドラッグ＆ドロップ／クリックでのファイル選択（仕様書 §5.1） */
-export function Dropzone({ onFiles, onDemo, big = false }: DropzoneProps) {
+export function Dropzone({ onFiles, onDemo, onClipboard, big = false }: DropzoneProps) {
   const onDrop = useCallback(
     (acceptedFiles: File[], fileRejections: FileRejection[]) => {
       const all = [...acceptedFiles, ...fileRejections.map((r) => r.file)];
@@ -58,7 +59,7 @@ export function Dropzone({ onFiles, onDemo, big = false }: DropzoneProps) {
         {isDragActive ? "ここにドロップ" : "画像をドラッグ＆ドロップ"}
       </div>
       <div className="mb-4 text-[13.5px] text-text-3">
-        またはクリックしてファイルを選択 ・ 複数枚まとめてOK ・ ペースト可
+        またはクリックしてファイルを選択 ・ 複数枚まとめてOK
       </div>
       <div className="mb-5 flex gap-[7px]">
         {FORMAT_LABELS.map((f) => (
@@ -70,17 +71,30 @@ export function Dropzone({ onFiles, onDemo, big = false }: DropzoneProps) {
           </span>
         ))}
       </div>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDemo();
-        }}
-        className="inline-flex items-center gap-[7px] rounded-[8px] border border-border-strong bg-surface px-4 py-[9px] text-[13px] font-semibold text-text transition-colors duration-150 hover:border-accent hover:bg-surface-2 hover:text-accent"
-      >
-        <Icon name="bolt" size={14} />
-        サンプル画像で試す
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClipboard();
+          }}
+          className="inline-flex items-center gap-[7px] rounded-[8px] border border-border-strong bg-surface px-4 py-[9px] text-[13px] font-semibold text-text transition-colors duration-150 hover:border-accent hover:bg-surface-2 hover:text-accent"
+        >
+          <Icon name="clipboard" size={14} />
+          クリップボードから貼り付け
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDemo();
+          }}
+          className="inline-flex items-center gap-[7px] rounded-[8px] border border-border-strong bg-surface px-4 py-[9px] text-[13px] font-semibold text-text transition-colors duration-150 hover:border-accent hover:bg-surface-2 hover:text-accent"
+        >
+          <Icon name="bolt" size={14} />
+          サンプル画像で試す
+        </button>
+      </div>
     </div>
   );
 }
