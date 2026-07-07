@@ -79,51 +79,53 @@ export function SizePresets({ settings, onChange }: SizePresetsProps) {
         ))}
       </div>
 
-      <div className="mt-[18px] flex items-center gap-[9px] border-t border-dashed border-border pt-4">
-        <span className="mr-0.5 text-xs font-semibold text-text-2">カスタム</span>
-        <div className="flex h-9 w-[116px] items-center overflow-hidden rounded-sm border border-border-input bg-surface focus-within:border-accent focus-within:ring-[3px] focus-within:ring-accent-weak">
-          <input
-            type="number"
-            value={settings.width}
-            onChange={(e) => setWidth(Number(e.target.value))}
-            className="mono-num h-9 min-w-0 flex-1 border-0 bg-transparent px-2.5 text-[13.5px] text-text focus:outline-none"
-          />
-          <span className="grid h-full flex-none place-items-center self-stretch border-l border-border bg-surface-2 px-[11px] text-xs text-text-3">
-            W
-          </span>
+      <div className="mt-[18px] flex flex-col gap-2 border-t border-dashed border-border pt-4 sm:flex-row sm:items-center sm:gap-[9px]">
+        <span className="text-xs font-semibold text-text-2">カスタム</span>
+        <div className="flex items-center gap-[9px]">
+          <div className="flex h-9 w-[116px] items-center overflow-hidden rounded-sm border border-border-input bg-surface focus-within:border-accent focus-within:ring-[3px] focus-within:ring-accent-weak">
+            <input
+              type="number"
+              value={settings.width}
+              onChange={(e) => setWidth(Number(e.target.value))}
+              className="mono-num h-9 min-w-0 flex-1 border-0 bg-transparent px-2.5 text-[13.5px] text-text focus:outline-none"
+            />
+            <span className="grid h-full flex-none place-items-center self-stretch border-l border-border bg-surface-2 px-[11px] text-xs text-text-3">
+              W
+            </span>
+          </div>
+          <button
+            type="button"
+            title="縦横比を固定"
+            onClick={() => setLocked((v) => !v)}
+            className={`grid h-[30px] w-[30px] flex-none place-items-center rounded-[7px] border transition-colors duration-150 ${
+              locked
+                ? "border-accent bg-accent-weak text-accent"
+                : "border-border-strong bg-surface text-text-3 hover:border-border-input hover:text-text"
+            }`}
+          >
+            <Icon name={locked ? "lock" : "link"} size={15} />
+          </button>
+          <div className="flex h-9 w-[116px] items-center overflow-hidden rounded-sm border border-border-input bg-surface focus-within:border-accent focus-within:ring-[3px] focus-within:ring-accent-weak">
+            <input
+              type="number"
+              value={settings.height}
+              onChange={(e) => setHeight(Number(e.target.value))}
+              className="mono-num h-9 min-w-0 flex-1 border-0 bg-transparent px-2.5 text-[13.5px] text-text focus:outline-none"
+            />
+            <span className="grid h-full flex-none place-items-center self-stretch border-l border-border bg-surface-2 px-[11px] text-xs text-text-3">
+              H
+            </span>
+          </div>
+          <button
+            type="button"
+            title="縦横を入れ替え"
+            onClick={swap}
+            className="grid h-8 w-8 flex-none place-items-center rounded-sm bg-surface-2 text-text-2 transition-colors duration-150 hover:bg-canvas-2 hover:text-text"
+          >
+            <Icon name="flipH" size={15} />
+          </button>
         </div>
-        <button
-          type="button"
-          title="縦横比を固定"
-          onClick={() => setLocked((v) => !v)}
-          className={`grid h-[30px] w-[30px] flex-none place-items-center rounded-[7px] border transition-colors duration-150 ${
-            locked
-              ? "border-accent bg-accent-weak text-accent"
-              : "border-border-strong bg-surface text-text-3 hover:border-border-input hover:text-text"
-          }`}
-        >
-          <Icon name={locked ? "lock" : "link"} size={15} />
-        </button>
-        <div className="flex h-9 w-[116px] items-center overflow-hidden rounded-sm border border-border-input bg-surface focus-within:border-accent focus-within:ring-[3px] focus-within:ring-accent-weak">
-          <input
-            type="number"
-            value={settings.height}
-            onChange={(e) => setHeight(Number(e.target.value))}
-            className="mono-num h-9 min-w-0 flex-1 border-0 bg-transparent px-2.5 text-[13.5px] text-text focus:outline-none"
-          />
-          <span className="grid h-full flex-none place-items-center self-stretch border-l border-border bg-surface-2 px-[11px] text-xs text-text-3">
-            H
-          </span>
-        </div>
-        <button
-          type="button"
-          title="縦横を入れ替え"
-          onClick={swap}
-          className="grid h-8 w-8 flex-none place-items-center rounded-sm bg-surface-2 text-text-2 transition-colors duration-150 hover:bg-canvas-2 hover:text-text"
-        >
-          <Icon name="flipH" size={15} />
-        </button>
-        <span className="mono-num ml-auto rounded-[6px] border border-border bg-surface-2 px-[9px] py-1 text-xs text-text-2">
+        <span className="mono-num self-start rounded-[6px] border border-border bg-surface-2 px-[9px] py-1 text-xs text-text-2">
           {aspectLabel(settings.width, settings.height)}
         </span>
       </div>

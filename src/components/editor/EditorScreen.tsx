@@ -56,7 +56,7 @@ export function EditorScreen() {
         onReset={() => resetImage(item.id)}
         onDone={() => goToStep("list")}
       />
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         <EditorStage
           key={item.id}
           item={item}

@@ -29,7 +29,7 @@ export function EditorPanel({
   const shapeLabel = SHAPES.find((s) => s.id === settings.shape)?.label ?? "";
 
   return (
-    <aside className="flex w-[312px] flex-none flex-col border-l border-border bg-surface">
+    <aside className="flex h-[240px] w-full flex-none flex-col overflow-hidden border-t border-border bg-surface md:h-auto md:w-[312px] md:border-l md:border-t-0">
       <div className="flex gap-3.5 border-b border-border p-[18px]">
         <div
           className="checker w-[84px] flex-none self-start overflow-hidden border border-border shadow-sm"

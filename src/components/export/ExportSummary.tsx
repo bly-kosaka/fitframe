@@ -24,17 +24,21 @@ export function ExportSummary({ images, settings }: ExportSummaryProps) {
   ];
 
   return (
-    <div className="mb-3.5 grid grid-cols-2 rounded-md border border-border bg-surface-2 px-[18px]">
+    <div className="mb-3.5 grid grid-cols-1 rounded-md border border-border bg-surface-2 sm:grid-cols-2">
       {items.map((item, i) => (
         <div
           key={item.k}
-          className={`flex items-center justify-between gap-2.5 py-[11px] ${
-            i % 2 === 0 ? "border-r border-border pr-4" : "pl-4"
-          } ${i < 2 ? "border-b border-border" : ""}`}
+          className={[
+            "flex items-center justify-between gap-2.5 px-[18px] py-[9px] sm:py-[11px]",
+            i < items.length - 1 ? "border-b border-border" : "",
+            i === 2 ? "sm:border-b-0" : "",
+            i < 2 ? "sm:border-b sm:border-border" : "",
+            i % 2 === 0 ? "sm:border-r sm:border-border sm:pr-4 sm:pl-[18px]" : "sm:pl-4 sm:pr-[18px]",
+          ].filter(Boolean).join(" ")}
         >
           <span className="whitespace-nowrap text-xs text-text-3">{item.k}</span>
           <span
-            className={`whitespace-nowrap text-right text-[13px] font-semibold text-text ${item.mono ? "mono-num" : ""}`}
+            className={`whitespace-nowrap text-right text-[12px] font-semibold text-text sm:text-[13px] ${item.mono ? "mono-num" : ""}`}
           >
             {item.v}
           </span>

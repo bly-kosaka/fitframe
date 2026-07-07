@@ -57,7 +57,7 @@ export function FitModeCards({ fit, onChange }: FitModeCardsProps) {
         <Icon name="layers" size={16} className="text-accent" />
         枠への収め方（フィット）
       </div>
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
         {FIT_MODES.map((m) => {
           const on = fit === m.id;
           return (

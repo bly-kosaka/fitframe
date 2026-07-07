@@ -25,18 +25,18 @@ export function EditorNav({
   onDone,
 }: EditorNavProps) {
   return (
-    <div className="flex h-14 flex-none items-center justify-between border-b border-border bg-surface px-[18px]">
+    <div className="flex h-14 flex-none items-center justify-between border-b border-border bg-surface px-2 sm:px-[18px]">
       <Button variant="ghost" size="sm" onClick={onBack}>
         <Icon name="arrowLeft" size={15} />
-        一覧へ
+        <span className="hidden sm:inline">一覧へ</span>
       </Button>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         <Button variant="subtle" size="sm" icon title="前の画像 (←)" onClick={onPrev}>
           <Icon name="chevLeft" size={16} />
         </Button>
-        <div className="flex min-w-[180px] flex-col items-center">
+        <div className="flex min-w-[80px] flex-col items-center sm:min-w-[180px]">
           <span
-            className="max-w-[260px] truncate text-[13px] font-semibold text-text"
+            className="max-w-[100px] truncate text-[13px] font-semibold text-text sm:max-w-[260px]"
             title={item.name}
           >
             {item.name}
@@ -49,10 +49,10 @@ export function EditorNav({
           <Icon name="chevRight" size={16} />
         </Button>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-1 sm:gap-2">
         <Button variant="ghost" size="sm" disabled={!item.edited} onClick={onReset}>
           <Icon name="reset" size={15} />
-          自動配置に戻す
+          <span className="hidden sm:inline">自動配置に戻す</span>
         </Button>
         <Button variant="primary" size="sm" onClick={onDone}>
           <Icon name="check" size={15} stroke={2.6} />

@@ -22,7 +22,7 @@ export function LivePreview({ settings, images }: LivePreviewProps) {
   );
 
   return (
-    <aside className="col-start-2 row-start-1 overflow-y-auto border-l border-border bg-surface">
+    <aside className="hidden overflow-y-auto border-l border-border bg-surface md:col-start-2 md:row-start-1 md:block">
       <div className="px-[22px] py-6">
         <div className="mb-3.5 flex items-baseline justify-between text-[13px] font-bold text-text">
           <span>プレビュー</span>

@@ -21,10 +21,11 @@ export function FormatBackground({ settings, onChange }: FormatBackgroundProps) 
         <Icon name="fileImage" size={16} className="text-accent" />
         出力形式 ・ 背景
       </div>
-      <div className="grid grid-cols-2 gap-[22px]">
+      <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2 sm:gap-[22px]">
         <div>
           <span className="mb-[7px] block text-xs font-semibold text-text-2">ファイル形式</span>
           <Segmented
+            grid2
             value={settings.format}
             onChange={(format) => onChange({ format })}
             options={FORMATS.map((f) => ({

@@ -16,7 +16,7 @@ const VALUE_PROPS: ValueProp[] = [
 /** 価値訴求カード 4 枚（仕様書 §5.1） */
 export function ValueProps() {
   return (
-    <div className="mb-[30px] grid grid-cols-4 gap-3">
+    <div className="mb-[30px] grid grid-cols-2 gap-3 sm:grid-cols-4">
       {VALUE_PROPS.map((v) => (
         <div
           key={v.title}

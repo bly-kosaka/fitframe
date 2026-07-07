@@ -37,12 +37,12 @@ export function Stepper({ step, maxStep, onNavigate }: StepperProps) {
         const isDone = i < active;
         return (
           <Fragment key={s.id}>
-            {i > 0 && <div className="h-px w-4 bg-border-strong" />}
+            {i > 0 && <div className="h-px w-2 bg-border-strong sm:w-4" />}
             <button
               type="button"
               disabled={!enabled}
               onClick={() => onNavigate(s.id)}
-              className={`flex items-center gap-[9px] whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-[0.45] ${
+              className={`flex items-center gap-[9px] whitespace-nowrap rounded-full px-2 py-1.5 text-[13px] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-[0.45] sm:px-3 ${
                 isActive
                   ? "bg-accent-weak text-accent"
                   : isDone
@@ -61,7 +61,7 @@ export function Stepper({ step, maxStep, onNavigate }: StepperProps) {
               >
                 {isDone ? <Icon name="check" size={13} stroke={2.6} /> : i + 1}
               </span>
-              {s.label}
+              <span className="hidden sm:inline">{s.label}</span>
             </button>
           </Fragment>
         );

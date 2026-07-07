@@ -51,6 +51,7 @@ export function ShapePicker({ settings, onChange }: ShapePickerProps) {
       </div>
       <div className="flex flex-wrap items-center gap-[18px]">
         <Segmented
+          grid2
           value={settings.shape}
           onChange={(shape) => onChange({ shape })}
           options={SHAPES.map((sh) => ({

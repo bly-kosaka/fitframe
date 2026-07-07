@@ -65,17 +65,17 @@ export function UploadScreen() {
   }, [handleFiles]);
 
   return (
-    <div className="mx-auto w-full max-w-[880px] animate-screen-fade px-8 pb-12 pt-14">
+    <div className="mx-auto w-full max-w-[880px] animate-screen-fade px-4 pb-8 pt-8 sm:px-8 sm:pb-12 sm:pt-14">
       <div className="mb-9 flex flex-col items-center">
         <span className="mb-[18px] inline-block rounded-full bg-accent-weak px-[11px] py-[5px] text-xs font-bold uppercase tracking-[0.12em] text-accent">
           画像フィッティングツール
         </span>
-        <h1 className="mb-4 text-center font-display text-[40px] font-semibold leading-[1.18] tracking-[-0.02em] text-text">
+        <h1 className="mb-4 text-center font-display text-[20px] font-semibold leading-[1.18] tracking-[-0.02em] text-text sm:text-[40px]">
           画像のリサイズ＆トリミングを、
           <br />
           <span className="text-accent">ブラウザだけで</span>。
         </h1>
-        <p className="mx-auto max-w-[540px] text-center text-base leading-[1.7] text-text-2">
+        <p className="mx-auto max-w-[540px] text-center text-[14px] leading-[1.7] text-text-2 sm:text-base">
           複数画像を指定サイズへ一括フィット。Cover / Contain / Stretch
           とマスク形状を選んで、ZIPでまとめてダウンロード。
         </p>

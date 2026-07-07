@@ -102,7 +102,7 @@ export function EditorStage({ item, settings, onTransform }: EditorStageProps) {
           </div>
         </div>
       )}
-      <div className="pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-[7px] rounded-full bg-[rgba(21,24,30,0.82)] px-3.5 py-[7px] text-xs font-medium text-white backdrop-blur-[4px]">
+      <div className="pointer-events-none absolute bottom-4 left-1/2 hidden -translate-x-1/2 items-center gap-[7px] rounded-full bg-[rgba(21,24,30,0.82)] px-3.5 py-[7px] text-xs font-medium text-white backdrop-blur-[4px] sm:flex">
         <Icon name="move" size={13} />
         ドラッグで移動 ・ Shiftで軸固定 ・ ホイールで拡大縮小 ・ ダブルクリックで中央へ
       </div>

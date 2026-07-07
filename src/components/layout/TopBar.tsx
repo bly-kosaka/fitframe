@@ -18,24 +18,29 @@ export function TopBar() {
     pushToast("リセットしました");
   };
 
+  const hasRightContent = state.images.length > 0 || state.step !== "upload";
+
   return (
-    <header className="flex h-[60px] flex-none items-center gap-[18px] border-b border-border bg-surface px-5">
-      <button
-        type="button"
-        className="flex select-none items-center gap-2.5"
-        onClick={() => goToStep("upload")}
-      >
-        <div className="grid h-[30px] w-[30px] place-items-center rounded-lg bg-accent shadow-xs">
-          <Icon name="crop" size={17} stroke={2.2} className="text-white" />
-        </div>
-        <div className="font-display text-[17px] font-semibold tracking-tight text-text">
-          Fit<b className="font-bold text-accent">Frame</b>
-        </div>
-      </button>
+    <header className="flex flex-none flex-col gap-1 border-b border-border bg-surface px-3 py-2 sm:h-[60px] sm:flex-row sm:items-center sm:gap-[18px] sm:py-0 sm:px-5">
+      {/* Row 1: Logo + Stepper */}
+      <div className="flex items-center gap-1.5 sm:contents">
+        <button
+          type="button"
+          className="flex flex-none select-none items-center gap-2.5"
+          onClick={() => goToStep("upload")}
+        >
+          <div className="grid h-[30px] w-[30px] place-items-center rounded-lg bg-accent shadow-xs">
+            <Icon name="crop" size={17} stroke={2.2} className="text-white" />
+          </div>
+          <div className="font-display text-[17px] font-semibold tracking-tight text-text">
+            Fit<b className="font-bold text-accent">Frame</b>
+          </div>
+        </button>
+        <Stepper step={state.step} maxStep={maxStep} onNavigate={goToStep} />
+      </div>
 
-      <Stepper step={state.step} maxStep={maxStep} onNavigate={goToStep} />
-
-      <div className="flex items-center gap-3">
+      {/* Row 2 on mobile / right side on desktop */}
+      <div className={`flex items-center justify-end gap-2 sm:gap-3 ${!hasRightContent ? "hidden sm:flex" : ""}`}>
         <Pill variant="ok" className="hidden sm:inline-flex">
           <Icon name="lock" size={12} />
           ローカル処理
@@ -49,7 +54,7 @@ export function TopBar() {
         {state.step !== "upload" && (
           <Button variant="subtle" size="sm" onClick={handleResetAll}>
             <Icon name="reset" size={14} />
-            やり直す
+            <span className="hidden sm:inline">やり直す</span>
           </Button>
         )}
       </div>

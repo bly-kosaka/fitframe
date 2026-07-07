@@ -9,7 +9,7 @@ export interface FooterBarProps {
 export function FooterBar({ children, className }: FooterBarProps) {
   return (
     <div
-      className={`flex items-center gap-4 border-t border-border bg-surface px-6 py-3.5 shadow-[0_-2px_10px_rgba(20,27,45,0.03)] ${className ?? ""}`}
+      className={`flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5 shadow-[0_-2px_10px_rgba(20,27,45,0.03)] sm:gap-4 sm:px-6 sm:py-3.5 ${className ?? ""}`}
     >
       {children}
     </div>

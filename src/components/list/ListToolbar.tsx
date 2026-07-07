@@ -40,7 +40,7 @@ export function ListToolbar({
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="mx-auto mb-[22px] flex max-w-[1400px] items-start justify-between gap-6">
+    <div className="mx-auto mb-[18px] flex max-w-[1400px] flex-col gap-3 sm:mb-[22px] sm:flex-row sm:items-start sm:justify-between sm:gap-6">
       <ScreenHeader
         title="配置の確認"
         subtitle={
@@ -53,7 +53,7 @@ export function ListToolbar({
           </>
         }
       />
-      <div className="flex flex-none items-center gap-2.5">
+      <div className="flex flex-none flex-col gap-2 sm:flex-row sm:items-center sm:gap-2.5">
         {layout === "grid" && (
           <div className="flex items-center gap-2 px-1.5">
             <Icon name="grid" size={14} className="text-text-3" />
@@ -66,24 +66,26 @@ export function ListToolbar({
             />
           </div>
         )}
-        <Segmented
-          value={layout}
-          onChange={onLayoutChange}
-          options={LAYOUT_OPTIONS.map((opt) => ({
-            value: opt.value,
-            title: opt.label,
-            label: (
-              <>
-                <Icon name={opt.icon} size={15} />
-                {opt.label}
-              </>
-            ),
-          }))}
-        />
-        <Button variant="ghost" size="sm" onClick={() => inputRef.current?.click()}>
-          <Icon name="plus" size={15} />
-          追加
-        </Button>
+        <div className="flex items-center gap-2">
+          <Segmented
+            value={layout}
+            onChange={onLayoutChange}
+            options={LAYOUT_OPTIONS.map((opt) => ({
+              value: opt.value,
+              title: opt.label,
+              label: (
+                <>
+                  <Icon name={opt.icon} size={15} />
+                  {opt.label}
+                </>
+              ),
+            }))}
+          />
+          <Button variant="ghost" size="sm" onClick={() => inputRef.current?.click()}>
+            <Icon name="plus" size={15} />
+            追加
+          </Button>
+        </div>
         <input
           ref={inputRef}
           type="file"

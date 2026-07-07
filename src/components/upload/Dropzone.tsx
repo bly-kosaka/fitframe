@@ -71,7 +71,7 @@ export function Dropzone({ onFiles, onDemo, onClipboard, big = false }: Dropzone
           </span>
         ))}
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap justify-center gap-2">
         <button
           type="button"
           onClick={(e) => {

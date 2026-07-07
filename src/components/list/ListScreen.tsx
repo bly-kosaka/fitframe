@@ -54,7 +54,7 @@ export function ListScreen() {
 
   return (
     <div className="flex min-h-0 flex-1 animate-screen-fade flex-col">
-      <div className="flex-1 overflow-y-auto px-8 pb-6 pt-[26px]">
+      <div className="flex-1 overflow-y-auto px-4 pb-6 pt-[18px] sm:px-8 sm:pt-[26px]">
         <ListToolbar
           imageCount={images.length}
           width={settings.width}
@@ -103,7 +103,7 @@ export function ListScreen() {
           <Icon name="arrowLeft" size={16} />
           設定に戻る
         </Button>
-        <div className="mono-num mx-auto rounded-[8px] border border-border bg-surface-2 px-3.5 py-[7px] text-[12.5px] text-text-2">
+        <div className="mono-num mx-auto hidden rounded-[8px] border border-border bg-surface-2 px-3.5 py-[7px] text-[12.5px] text-text-2 sm:block">
           {editedCount > 0 ? (
             <>
               <span className="font-bold text-text">{editedCount}</span> 枚を個別調整 ・

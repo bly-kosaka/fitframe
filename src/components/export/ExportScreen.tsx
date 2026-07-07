@@ -27,7 +27,7 @@ export function ExportScreen() {
   return (
     <div className="flex min-h-0 flex-1 animate-screen-fade flex-col">
       <div className="flex flex-1 items-start justify-center overflow-y-auto px-6 py-10">
-        <div className="w-full max-w-[560px] rounded-xl border border-border bg-surface px-[38px] pb-[30px] pt-[38px] text-center shadow-md">
+        <div className="w-full max-w-[560px] rounded-xl border border-border bg-surface px-5 pb-6 pt-6 text-center shadow-md sm:px-[38px] sm:pb-[30px] sm:pt-[38px]">
           {phase === "ready" && (
             <>
               <div className="mx-auto mb-[18px] grid h-16 w-16 place-items-center rounded-[18px] bg-accent-weak text-accent">
