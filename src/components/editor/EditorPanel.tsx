@@ -1,4 +1,9 @@
+"use client";
+
+import { useState } from "react";
+
 import { FittedThumb } from "@/components/ui/FittedThumb";
+import { Icon } from "@/components/ui/Icon";
 import { Pill } from "@/components/ui/Pill";
 import { EDITOR_PANEL_THUMB_MAX_DIM } from "@/lib/constants";
 import { shapeRadiusCSS } from "@/lib/fit";
@@ -27,10 +32,37 @@ export function EditorPanel({
 }: EditorPanelProps) {
   const fitLabel = FIT_MODES.find((f) => f.id === settings.fit)?.label ?? "";
   const shapeLabel = SHAPES.find((s) => s.id === settings.shape)?.label ?? "";
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <aside className="flex h-[240px] w-full flex-none flex-col overflow-hidden border-t border-border bg-surface md:h-auto md:w-[312px] md:border-l md:border-t-0">
-      <div className="flex gap-3.5 border-b border-border p-[18px]">
+    <aside
+      className={`flex flex-none flex-col overflow-hidden border-t border-border bg-surface transition-[height] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:h-auto md:w-[312px] md:border-l md:border-t-0 ${
+        isOpen ? "h-[50vh]" : "h-11"
+      }`}
+    >
+      {/* モバイル用トグルハンドル */}
+      <button
+        type="button"
+        className="flex h-11 flex-none items-center justify-between border-b border-border px-4 md:hidden"
+        onClick={() => setIsOpen((v) => !v)}
+      >
+        <span className="text-[13px] font-semibold text-text-2">編集コントロール</span>
+        <div className="flex items-center gap-2">
+          {item.edited && (
+            <Pill variant="accent" className="text-[11px]">
+              調整済み
+            </Pill>
+          )}
+          <Icon
+            name="chevLeft"
+            size={16}
+            className={`text-text-3 transition-transform duration-300 ${isOpen ? "-rotate-90" : "rotate-90"}`}
+          />
+        </div>
+      </button>
+
+      {/* デスクトップ用ヘッダー（サムネイル＋情報） */}
+      <div className="hidden gap-3.5 border-b border-border p-[18px] md:flex">
         <div
           className="checker w-[84px] flex-none self-start overflow-hidden border border-border shadow-sm"
           style={{
@@ -68,6 +100,8 @@ export function EditorPanel({
           )}
         </div>
       </div>
+
+      {/* コントロール（スクロール可能） */}
       <div className="flex-1 overflow-y-auto px-[18px] pb-[22px] pt-1.5">
         <EditorControls
           item={item}

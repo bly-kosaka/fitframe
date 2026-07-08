@@ -115,7 +115,7 @@ export function ExportScreen() {
                 )}
               </p>
               <ResultGrid images={images} settings={settings} results={results} />
-              <div className="flex gap-2.5">
+              <div className="flex flex-col gap-2.5 sm:flex-row">
                 <Button variant="primary" size="lg" className="flex-1" onClick={redownload}>
                   <Icon name="download" size={17} />
                   もう一度ダウンロード
