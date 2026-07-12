@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { useImageStore } from "@/hooks/useImageStore";
 import { useToasts } from "@/hooks/useToasts";
+import { repSettings } from "@/lib/presets";
 import { processFiles } from "@/lib/validate";
 
 import { ImageGrid } from "./ImageGrid";
@@ -26,7 +27,9 @@ export function ListScreen() {
     setGridCellSize,
   } = useImageStore();
   const { pushToast } = useToasts();
-  const { images, settings, listLayout, gridCellSize } = state;
+  const { images, config, listLayout, gridCellSize } = state;
+  const settings = repSettings(config);
+  const sizeCount = config.profiles.length;
 
   const editedCount = images.filter((item) => item.edited).length;
 
@@ -57,8 +60,7 @@ export function ListScreen() {
       <div className="flex-1 overflow-y-auto px-4 pb-6 pt-[18px] sm:px-8 sm:pt-[26px]">
         <ListToolbar
           imageCount={images.length}
-          width={settings.width}
-          height={settings.height}
+          sizeCount={sizeCount}
           layout={listLayout}
           onLayoutChange={setListLayout}
           cellSize={gridCellSize}
@@ -106,8 +108,18 @@ export function ListScreen() {
         <div className="mono-num mx-auto hidden rounded-[8px] border border-border bg-surface-2 px-3.5 py-[7px] text-[12.5px] text-text-2 sm:block">
           {editedCount > 0 ? (
             <>
-              <span className="font-bold text-text">{editedCount}</span> 枚を個別調整 ・
-              残り自動配置
+              <span className="font-bold text-text">{editedCount}</span> 枚を個別調整 ・ 残り自動配置
+              {sizeCount > 1 && (
+                <>
+                  {" "}・{" "}
+                  <span className="font-bold text-text">{images.length * sizeCount}</span> ファイル出力
+                </>
+              )}
+            </>
+          ) : sizeCount > 1 ? (
+            <>
+              全 {images.length} 枚 × {sizeCount} サイズ ={" "}
+              <span className="font-bold text-text">{images.length * sizeCount}</span> ファイル出力
             </>
           ) : (
             `全 ${images.length} 枚を自動配置で出力`

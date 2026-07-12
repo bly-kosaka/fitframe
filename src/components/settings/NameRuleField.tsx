@@ -1,13 +1,15 @@
 import { Icon } from "@/components/ui/Icon";
 import { resolveFileName } from "@/lib/filename";
 import { FORMATS, NAME_TOKENS } from "@/lib/presets";
-import type { ImageItem, OutputSettings } from "@/lib/types";
+import type { GlobalOutputSettings, ImageItem, OutputSettings } from "@/lib/types";
 
 export interface NameRuleFieldProps {
   settings: OutputSettings;
-  onChange: (patch: Partial<OutputSettings>) => void;
+  onChange: (patch: Partial<GlobalOutputSettings>) => void;
   representative?: ImageItem;
   totalCount: number;
+  /** 出力例に使うラベル（先頭プロファイル） */
+  sampleLabel?: string;
 }
 
 /** ファイル名ルール（一括）とメタデータ方針（仕様書 §5.2-5, §5.6） */
@@ -16,6 +18,7 @@ export function NameRuleField({
   onChange,
   representative,
   totalCount,
+  sampleLabel = "",
 }: NameRuleFieldProps) {
   const ext = FORMATS.find((f) => f.id === settings.format)?.ext ?? "";
 
@@ -61,7 +64,7 @@ export function NameRuleField({
         <div className="mt-3.5 flex items-center gap-2.5 rounded-sm border border-border bg-surface-2 px-[13px] py-2.5">
           <span className="flex-none text-[11px] font-bold text-text-3">出力例</span>
           <span className="mono-num break-all text-[13px] font-semibold text-text">
-            {resolveFileName(representative, settings, 0, totalCount)}
+            {resolveFileName(representative, settings, 0, totalCount, sampleLabel)}
           </span>
         </div>
       )}

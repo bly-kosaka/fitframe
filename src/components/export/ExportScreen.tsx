@@ -2,26 +2,38 @@
 
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
+import { Segmented } from "@/components/ui/Segmented";
 import { useExport } from "@/hooks/useExport";
 import { useImageStore } from "@/hooks/useImageStore";
 import { useToasts } from "@/hooks/useToasts";
+import type { ZipLayout } from "@/lib/types";
 import { ZIP_SIZE_WARNING_BYTES } from "@/lib/constants";
 import { estimateBytes, formatBytes } from "@/lib/format";
+import { toSettings } from "@/lib/presets";
 
 import { ExportSummary } from "./ExportSummary";
 import { ProgressList } from "./ProgressList";
 import { ResultGrid } from "./ResultGrid";
 
-/** ダウンロード画面：ZIP生成・進捗表示・完了後の操作（仕様書 §5.5） */
+/** ダウンロード画面：ZIP生成・進捗表示・完了後の操作（仕様書 §4.4 / §5.5） */
 export function ExportScreen() {
-  const { state, goToStep, resetAll } = useImageStore();
-  const { images, settings } = state;
+  const { state, goToStep, resetAll, setGlobal } = useImageStore();
+  const { images, config } = state;
   const { pushToast } = useToasts();
-  const { phase, done, results, isSingle, start, redownload } = useExport(images, settings, pushToast);
+  const multiOutput = config.profiles.length > 1;
+  const { phase, done, total, results, isSingle, start, redownload } = useExport(
+    images,
+    config,
+    pushToast,
+  );
 
-  const totalEst = images.length * estimateBytes(settings);
+  const perImageEst = config.profiles.reduce(
+    (sum, p) => sum + estimateBytes(toSettings(config.global, p)),
+    0,
+  );
+  const totalEst = images.length * perImageEst;
   const isLargeExport = totalEst > ZIP_SIZE_WARNING_BYTES;
-  const pct = images.length ? Math.round((done / images.length) * 100) : 0;
+  const pct = total ? Math.round((done / total) * 100) : 0;
   const totalBytes = results.reduce((sum, r) => sum + r.bytes, 0);
 
   return (
@@ -41,7 +53,23 @@ export function ExportScreen() {
                   ? "画像を設定どおりに書き出してダウンロードします。処理はすべてこのブラウザ内で行われ、画像が外部に送信されることはありません。"
                   : "全画像を設定どおりに書き出し、1つのZIPファイルにまとめます。処理はすべてこのブラウザ内で行われ、画像が外部に送信されることはありません。"}
               </p>
-              <ExportSummary images={images} settings={settings} />
+              <ExportSummary images={images} config={config} />
+              {multiOutput && (
+                <div className="mb-[18px] text-left">
+                  <span className="mb-[7px] block text-xs font-semibold text-text-2">
+                    ZIP のフォルダー構成
+                  </span>
+                  <Segmented
+                    value={config.global.zipLayout}
+                    onChange={(zipLayout: ZipLayout) => setGlobal({ zipLayout })}
+                    options={[
+                      { value: "byLabel" as const, label: "ラベル別", title: "pc/ sp/ … サイズごとにフォルダー分け" },
+                      { value: "byImage" as const, label: "画像別", title: "img1/ img2/ … 画像ごとにフォルダー分け" },
+                      { value: "flat" as const, label: "まとめる", title: "フォルダー分けなし（全ファイル同一階層）" },
+                    ]}
+                  />
+                </div>
+              )}
               <p className="mono-num mb-[22px] text-xs text-text-3">
                 推定合計サイズ 約 {formatBytes(totalEst)}
               </p>
@@ -79,7 +107,7 @@ export function ExportScreen() {
               <div className="mb-[22px] text-left">
                 <div className="mono-num mb-[9px] flex justify-between text-[13px] font-semibold text-text-2">
                   <span>
-                    {done} / {images.length} 枚
+                    {done} / {total} ファイル
                   </span>
                   <span>{pct}%</span>
                 </div>
@@ -90,7 +118,7 @@ export function ExportScreen() {
                   />
                 </div>
               </div>
-              <ProgressList images={images} settings={settings} done={done} results={results} />
+              <ProgressList images={images} config={config} done={done} results={results} />
             </>
           )}
 
@@ -109,12 +137,12 @@ export function ExportScreen() {
                   </>
                 ) : (
                   <>
-                    <b className="mono-num">{images.length}</b> 枚を書き出し、合計{" "}
+                    <b className="mono-num">{results.length}</b> ファイルを書き出し、合計{" "}
                     <b className="mono-num">{formatBytes(totalBytes)}</b> のZIPをダウンロードしました。
                   </>
                 )}
               </p>
-              <ResultGrid images={images} settings={settings} results={results} />
+              <ResultGrid images={images} config={config} results={results} />
               <div className="flex flex-col gap-2.5 sm:flex-row">
                 <Button variant="primary" size="lg" className="flex-1" onClick={redownload}>
                   <Icon name="download" size={17} />

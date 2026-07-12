@@ -4,11 +4,11 @@ import { Segmented } from "@/components/ui/Segmented";
 import { Slider } from "@/components/ui/Slider";
 import { QUALITY_MAX, QUALITY_MIN, QUALITY_STEP } from "@/lib/constants";
 import { BG_OPTIONS, FORMATS } from "@/lib/presets";
-import type { OutputSettings } from "@/lib/types";
+import type { GlobalOutputSettings, OutputSettings } from "@/lib/types";
 
 export interface FormatBackgroundProps {
   settings: OutputSettings;
-  onChange: (patch: Partial<OutputSettings>) => void;
+  onChange: (patch: Partial<GlobalOutputSettings>) => void;
 }
 
 /** "#abc" / "abc" / "#aabbcc" → "#aabbcc"（正規化）。無効なら null */

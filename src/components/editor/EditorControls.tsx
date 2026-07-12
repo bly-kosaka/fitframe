@@ -9,11 +9,40 @@ import { resolveFileName } from "@/lib/filename";
 import { FORMATS } from "@/lib/presets";
 import type { ImageItem, OutputSettings, Transform } from "@/lib/types";
 
+/** 焦点プリセット（fx,fy ∈ {0, 0.5, 1}）。サイズ非依存で全プロファイルへ波及する */
+const FOCUS_POINTS: { fx: number; fy: number; label: string }[] = [
+  { fx: 0, fy: 0, label: "左上に焦点" },
+  { fx: 0.5, fy: 0, label: "上中央に焦点" },
+  { fx: 1, fy: 0, label: "右上に焦点" },
+  { fx: 0, fy: 0.5, label: "左中央に焦点" },
+  { fx: 0.5, fy: 0.5, label: "中央に焦点" },
+  { fx: 1, fy: 0.5, label: "右中央に焦点" },
+  { fx: 0, fy: 1, label: "左下に焦点" },
+  { fx: 0.5, fy: 1, label: "下中央に焦点" },
+  { fx: 1, fy: 1, label: "右下に焦点" },
+];
+
+function FocusIcon({ col, row }: { col: 0 | 1 | 2; row: 0 | 1 | 2 }) {
+  const cx = col === 0 ? 4 : col === 1 ? 12 : 20;
+  const cy = row === 0 ? 4 : row === 1 ? 12 : 20;
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
+      <rect x="2" y="2" width="20" height="20" rx="2.5"
+        fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.35" />
+      <circle cx={cx} cy={cy} r="2.8" fill="currentColor" />
+    </svg>
+  );
+}
+
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+
 export interface EditorControlsProps {
   item: ImageItem;
   settings: OutputSettings;
   index: number;
   total: number;
+  /** 選択中プロファイルのラベル（ファイル名例の {label} 用） */
+  label: string;
   onTransform: (patch: Partial<Transform>) => void;
   onName: (id: string, name: string) => void;
 }
@@ -39,18 +68,19 @@ function ControlGroup({ title, icon, children }: ControlGroupProps) {
   );
 }
 
-/** 個別画像のファイル名・ズーム・回転・反転・位置を調整するコントロール群（仕様書 §5.4） */
+/** 個別画像のファイル名・焦点・ズーム・回転・反転を調整するコントロール群（仕様書 §4.3） */
 export function EditorControls({
   item,
   settings,
   index,
   total,
+  label,
   onTransform,
   onName,
 }: EditorControlsProps) {
   const t = item.transform;
   const ext = FORMATS.find((f) => f.id === settings.format)?.ext ?? "png";
-  const ruleFileName = resolveFileName({ ...item, customName: undefined }, settings, index, total);
+  const ruleFileName = resolveFileName({ ...item, customName: undefined }, settings, index, total, label);
   const ruleName = ruleFileName.replace(/\.[^.]+$/, "");
   const hasCustomName = Boolean(item.customName && item.customName.trim());
 
@@ -81,6 +111,51 @@ export function EditorControls({
           ) : (
             <span className="mono-num break-all leading-[1.4]">ルール: {ruleFileName}</span>
           )}
+        </div>
+      </ControlGroup>
+
+      <ControlGroup title="焦点（フォーカルポイント）" icon="crop">
+        <div className="grid grid-cols-3 gap-1.5">
+          {FOCUS_POINTS.map(({ fx, fy, label: pointLabel }, i) => {
+            const isActive = Math.abs(t.focus.fx - fx) < 0.02 && Math.abs(t.focus.fy - fy) < 0.02;
+            const col = (i % 3) as 0 | 1 | 2;
+            const row = Math.floor(i / 3) as 0 | 1 | 2;
+            return (
+              <button
+                key={pointLabel}
+                type="button"
+                title={pointLabel}
+                onClick={() => onTransform({ focus: { fx, fy } })}
+                className={`flex aspect-square items-center justify-center rounded-md border transition-colors duration-150 ${
+                  isActive
+                    ? "border-accent bg-accent-weak text-accent"
+                    : "border-border bg-surface text-text-3 hover:border-accent hover:text-accent"
+                }`}
+              >
+                <FocusIcon col={col} row={row} />
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+          <NumberStepper
+            label="X焦点"
+            value={Math.round(t.focus.fx * 100)}
+            unit="%"
+            step={5}
+            min={0}
+            max={100}
+            onChange={(v) => onTransform({ focus: { fx: clamp01(v / 100), fy: t.focus.fy } })}
+          />
+          <NumberStepper
+            label="Y焦点"
+            value={Math.round(t.focus.fy * 100)}
+            unit="%"
+            step={5}
+            min={0}
+            max={100}
+            onChange={(v) => onTransform({ focus: { fx: t.focus.fx, fy: clamp01(v / 100) } })}
+          />
         </div>
       </ControlGroup>
 
@@ -178,31 +253,6 @@ export function EditorControls({
             <Icon name="flipV" size={15} />
             上下反転
           </Button>
-        </div>
-      </ControlGroup>
-
-      <ControlGroup title="位置（px）" icon="move">
-        <div className="grid grid-cols-2 gap-2.5">
-          <NumberStepper label="X" value={t.x} step={5} onChange={(v) => onTransform({ x: v })} />
-          <NumberStepper label="Y" value={t.y} step={5} onChange={(v) => onTransform({ y: v })} />
-          <NumberStepper
-            label="倍率"
-            value={t.zoom * 100}
-            unit="%"
-            step={5}
-            min={ZOOM_MIN * 100}
-            max={ZOOM_MAX * 100}
-            onChange={(v) => onTransform({ zoom: v / 100 })}
-          />
-          <NumberStepper
-            label="角度"
-            value={t.rotation}
-            unit="°"
-            step={1}
-            min={ROTATION_MIN}
-            max={ROTATION_MAX}
-            onChange={(v) => onTransform({ rotation: v })}
-          />
         </div>
       </ControlGroup>
     </>

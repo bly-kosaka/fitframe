@@ -17,16 +17,19 @@ export interface EditorPanelProps {
   settings: OutputSettings;
   index: number;
   total: number;
+  /** 選択中プロファイルのラベル */
+  label: string;
   onTransform: (patch: Partial<Transform>) => void;
   onName: (id: string, name: string) => void;
 }
 
-/** 編集画面の右パネル：出力サイズ要約と調整コントロール（仕様書 §5.4） */
+/** 編集画面の右パネル：選択中プロファイルの要約と調整コントロール（仕様書 §4.3） */
 export function EditorPanel({
   item,
   settings,
   index,
   total,
+  label,
   onTransform,
   onName,
 }: EditorPanelProps) {
@@ -83,6 +86,9 @@ export function EditorPanel({
           />
         </div>
         <div>
+          <div className="truncate font-jp text-[12px] font-semibold text-accent" title={label}>
+            {label}
+          </div>
           <div className="mono-num text-[15px] font-semibold text-text">
             {settings.width} × {settings.height}
           </div>
@@ -108,6 +114,7 @@ export function EditorPanel({
           settings={settings}
           index={index}
           total={total}
+          label={label}
           onTransform={onTransform}
           onName={onName}
         />

@@ -1,41 +1,40 @@
 import { FittedThumb } from "@/components/ui/FittedThumb";
 import { RESULT_THUMB_MAX_DIM } from "@/lib/constants";
 import { shapeRadiusCSS } from "@/lib/fit";
-import type { ExportResult, ImageItem, OutputSettings } from "@/lib/types";
+import { toSettings } from "@/lib/presets";
+import type { ExportResult, ImageItem, OutputConfig } from "@/lib/types";
 
 export interface ResultGridProps {
   images: ImageItem[];
-  settings: OutputSettings;
+  config: OutputConfig;
   results: ExportResult[];
 }
 
 const MAX_VISIBLE = 12;
 
-/** 書き出し完了後のサムネイル一覧（仕様書 §5.5 `.done-grid`） */
-export function ResultGrid({ images, settings, results }: ResultGridProps) {
+/** 書き出し完了後のサムネイル一覧（`画像 × プロファイル`。仕様書 §4.4 / §5.5） */
+export function ResultGrid({ images, config, results }: ResultGridProps) {
+  const { profiles, global } = config;
   const visible = results.slice(0, MAX_VISIBLE);
   const remaining = results.length - visible.length;
-  const radius = shapeRadiusCSS(
-    settings.shape,
-    90,
-    (90 * settings.height) / settings.width,
-    settings.radius,
-  );
 
   return (
     <div className="mb-6 mt-1 grid grid-cols-6 gap-2">
-      {visible.map((r) => {
+      {visible.map((r, i) => {
         const item = images.find((im) => im.id === r.id);
-        if (!item) return null;
+        const profile = profiles.find((p) => p.id === r.profileId) ?? profiles[0];
+        if (!item || !profile) return null;
+        const s = toSettings(global, profile);
+        const radius = shapeRadiusCSS(global.shape, 90, (90 * profile.height) / profile.width, global.radius);
         return (
           <div
-            key={r.id}
+            key={`${r.id}-${r.profileId}-${i}`}
             className="checker overflow-hidden border border-border shadow-xs"
-            style={{ aspectRatio: `${settings.width} / ${settings.height}`, borderRadius: radius }}
+            style={{ aspectRatio: `${profile.width} / ${profile.height}`, borderRadius: radius }}
           >
             <FittedThumb
               element={item.element}
-              settings={settings}
+              settings={s}
               transform={item.transform}
               maxDim={RESULT_THUMB_MAX_DIM}
             />

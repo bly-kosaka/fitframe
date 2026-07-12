@@ -15,6 +15,54 @@ export function baseScale(iw: number, ih: number, s: OutputSettings): number {
   return Math.max(fw, fh); // cover / stretch（stretch は sx,sy を別途算出）
 }
 
+/** fit に応じた実効スケール（zoom 込み、flip 前）を返す */
+function effectiveScale(iw: number, ih: number, s: OutputSettings, t: Transform): { sx: number; sy: number } {
+  let sx: number;
+  let sy: number;
+  if (s.fit === "stretch") {
+    sx = s.width / iw;
+    sy = s.height / ih;
+  } else {
+    const b = baseScale(iw, ih, s);
+    sx = b;
+    sy = b;
+  }
+  return { sx: sx * t.zoom, sy: sy * t.zoom };
+}
+
+/**
+ * 正規化フォーカルポイント（focus）から、出力px空間での中心オフセット(ox,oy)を導出する（仕様書 §3）。
+ * focus 点が出力枠の中心へ来るよう配置し、cover 時は画像が枠を覆う範囲へクランプする。
+ * サイズ非依存なので、同じ focus を全プロファイルへ使い回せる。
+ */
+export function focusOffset(
+  iw: number,
+  ih: number,
+  s: OutputSettings,
+  t: Transform,
+): { ox: number; oy: number } {
+  const { sx, sy } = effectiveScale(iw, ih, s, t);
+  // 画像中心から focus 点までの元px距離
+  const ex = (t.focus.fx - 0.5) * iw;
+  const ey = (t.focus.fy - 0.5) * ih;
+  // flip → scale → rotate の順で出力空間へ写像（renderToCanvas の変換順に一致）
+  const vx = ex * sx * (t.flipH ? -1 : 1);
+  const vy = ey * sy * (t.flipV ? -1 : 1);
+  const rad = (t.rotation * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  let ox = -(vx * cos - vy * sin);
+  let oy = -(vx * sin + vy * cos);
+  // cover は背景が見えない範囲へクランプ（回転0前提の近似）
+  if (s.fit === "cover") {
+    const maxX = Math.max(0, (iw * sx) / 2 - s.width / 2);
+    const maxY = Math.max(0, (ih * sy) / 2 - s.height / 2);
+    ox = Math.max(-maxX, Math.min(maxX, ox));
+    oy = Math.max(-maxY, Math.min(maxY, oy));
+  }
+  return { ox, oy };
+}
+
 /** 角丸矩形のパスを構築する */
 export function roundRectPath(
   ctx: CanvasRenderingContext2D,
@@ -101,24 +149,14 @@ export function renderToCanvas(
     ctx.fillRect(0, 0, w, h);
   }
 
-  ctx.translate(w / 2 + t.x, h / 2 + t.y);
+  const iw = img.naturalWidth;
+  const ih = img.naturalHeight;
+  const { ox, oy } = focusOffset(iw, ih, s, t);
+  ctx.translate(w / 2 + ox, h / 2 + oy);
   ctx.rotate((t.rotation * Math.PI) / 180);
   ctx.scale(t.flipH ? -1 : 1, t.flipV ? -1 : 1);
 
-  const iw = img.naturalWidth;
-  const ih = img.naturalHeight;
-  let sx: number;
-  let sy: number;
-  if (s.fit === "stretch") {
-    sx = w / iw;
-    sy = h / ih;
-  } else {
-    const b = baseScale(iw, ih, s);
-    sx = b;
-    sy = b;
-  }
-  sx *= t.zoom;
-  sy *= t.zoom;
+  const { sx, sy } = effectiveScale(iw, ih, s, t);
 
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
@@ -143,12 +181,8 @@ export function renderPreviewCanvas(
     width: Math.max(1, Math.round(s.width * factor)),
     height: Math.max(1, Math.round(s.height * factor)),
   };
-  const previewTransform: Transform = {
-    ...t,
-    x: t.x * factor,
-    y: t.y * factor,
-  };
-  renderToCanvas(canvas, img, previewSettings, previewTransform);
+  // focus は正規化（サイズ非依存）なので、縮小しても transform はそのまま使える
+  renderToCanvas(canvas, img, previewSettings, t);
 }
 
 /** 形状プレビュー枠（CSS）用の border-radius 値を算出する */
@@ -213,24 +247,14 @@ export function renderBackdropCanvas(
   ctx.translate(frame.fx, frame.fy);
   ctx.scale(frame.scale, frame.scale);
   ctx.globalAlpha = 0.26;
-  ctx.translate(s.width / 2 + t.x, s.height / 2 + t.y);
+  const iw = img.naturalWidth;
+  const ih = img.naturalHeight;
+  const { ox, oy } = focusOffset(iw, ih, s, t);
+  ctx.translate(s.width / 2 + ox, s.height / 2 + oy);
   ctx.rotate((t.rotation * Math.PI) / 180);
   ctx.scale(t.flipH ? -1 : 1, t.flipV ? -1 : 1);
 
-  const iw = img.naturalWidth;
-  const ih = img.naturalHeight;
-  let sx: number;
-  let sy: number;
-  if (s.fit === "stretch") {
-    sx = s.width / iw;
-    sy = s.height / ih;
-  } else {
-    const b = baseScale(iw, ih, s);
-    sx = b;
-    sy = b;
-  }
-  sx *= t.zoom;
-  sy *= t.zoom;
+  const { sx, sy } = effectiveScale(iw, ih, s, t);
 
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";

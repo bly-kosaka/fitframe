@@ -6,11 +6,17 @@
 export const ACCEPTED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
 export const MAX_DIMENSION_PX = 10000; // 10000 x 10000 px まで
-export const MAX_FILE_COUNT = 100; // 合計100枚まで
+export const MAX_FILE_COUNT = 20; // 合計20枚まで
 
 // ---------- 出力サイズ ----------
 export const CUSTOM_SIZE_MIN = 1;
 export const CUSTOM_SIZE_MAX = 10000;
+
+// ---------- 出力プロファイル（複数サイズ展開） ----------
+export const PROFILE_MIN_COUNT = 1; // バスケットは最低1件
+export const PROFILE_MAX_COUNT = 20; // 上限の目安（仕様書 §7）
+// 大量出力（画像数×プロファイル数）がこれを超えたら書き出し前に警告する
+export const OUTPUT_COUNT_WARNING = 1000;
 
 // ---------- per-image Transform の可動域 ----------
 export const ZOOM_MIN = 0.1;

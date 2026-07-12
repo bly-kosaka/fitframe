@@ -1,27 +1,27 @@
 import { Icon } from "@/components/ui/Icon";
-import { resolveFileNames } from "@/lib/filename";
+import { planOutputs } from "@/lib/download";
 import { formatBytes } from "@/lib/format";
-import type { ExportResult, ImageItem, OutputSettings } from "@/lib/types";
+import type { ExportResult, ImageItem, OutputConfig } from "@/lib/types";
 
 export interface ProgressListProps {
   images: ImageItem[];
-  settings: OutputSettings;
+  config: OutputConfig;
   done: number;
   results: ExportResult[];
 }
 
-/** 書き出し中のファイル一覧（仕様書 §5.5 `.out-filelist`） */
-export function ProgressList({ images, settings, done, results }: ProgressListProps) {
-  const names = resolveFileNames(images, settings);
+/** 書き出し中のファイル一覧（`画像 × プロファイル`。仕様書 §4.4 / §5.5） */
+export function ProgressList({ images, config, done, results }: ProgressListProps) {
+  const entries = planOutputs(images, config);
 
   return (
     <div className="max-h-60 overflow-y-auto rounded-md border border-border text-left">
-      {images.map((item, i) => {
+      {entries.map((entry, i) => {
         const isDone = i < done;
         const isActive = i === done;
         return (
           <div
-            key={item.id}
+            key={`${entry.id}-${entry.profileId}`}
             className={`flex items-center gap-2.5 border-b border-border px-3.5 py-[9px] text-[12.5px] transition-colors duration-150 last:border-b-0 ${
               isDone ? "text-text" : isActive ? "bg-accent-weak text-accent" : "text-text-3"
             }`}
@@ -43,7 +43,7 @@ export function ProgressList({ images, settings, done, results }: ProgressListPr
                 <Icon name="fileImage" size={13} />
               )}
             </span>
-            <span className="min-w-0 flex-1 truncate font-medium">{names[i]}</span>
+            <span className="min-w-0 flex-1 truncate font-medium">{entry.path}</span>
             {isDone && results[i] && (
               <span className="mono-num text-[11.5px] text-text-3">
                 {formatBytes(results[i].bytes)}

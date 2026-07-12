@@ -6,6 +6,7 @@ import { FittedThumb } from "@/components/ui/FittedThumb";
 import { Icon } from "@/components/ui/Icon";
 import { useFittedCanvas } from "@/hooks/useFittedCanvas";
 import { EDITOR_STAGE_MAX_DIM, ZOOM_MAX, ZOOM_MIN } from "@/lib/constants";
+import { baseScale } from "@/lib/fit";
 import type { ImageItem, OutputSettings, Transform } from "@/lib/types";
 
 export interface EditorStageProps {
@@ -17,45 +18,51 @@ export interface EditorStageProps {
 interface DragState {
   x: number;
   y: number;
-  ox: number;
-  oy: number;
-  shift: boolean;
-  axis: "x" | "y" | null; // Shift モード時に最初の動きで確定する固定軸
+  fx: number;
+  fy: number;
 }
 
 const ZOOM_WHEEL_FACTOR = 1.06;
 
-/** ドラッグで移動・ホイールで拡大縮小できる編集ステージ（仕様書 §5.4） */
+/** fit に応じた実効スケール（zoom 込み） */
+function scaleFor(iw: number, ih: number, s: OutputSettings, zoom: number) {
+  if (s.fit === "stretch") return { sx: (s.width / iw) * zoom, sy: (s.height / ih) * zoom };
+  const b = baseScale(iw, ih, s) * zoom;
+  return { sx: b, sy: b };
+}
+
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+
+/**
+ * ステージ上のドラッグでフォーカルポイント（focus）を移動できる編集ステージ（仕様書 §4.3）。
+ * ドラッグで画像がカーソルに追従するよう focus を更新し、ホイールで zoom、
+ * ダブルクリックで focus を中央（0.5/0.5）へ戻す。位置はサイズ非依存で全プロファイルへ波及する。
+ */
 export function EditorStage({ item, settings, onTransform }: EditorStageProps) {
   const { stageRef, backdropRef, frame } = useFittedCanvas(item, settings);
   const dragRef = useRef<DragState | null>(null);
   const t = item.transform;
+  const iw = item.naturalWidth;
+  const ih = item.naturalHeight;
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (!frame) return;
     e.currentTarget.setPointerCapture(e.pointerId);
-    dragRef.current = { x: e.clientX, y: e.clientY, ox: t.x, oy: t.y, shift: e.shiftKey, axis: null };
+    dragRef.current = { x: e.clientX, y: e.clientY, fx: t.focus.fx, fy: t.focus.fy };
   };
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
     if (!drag || !frame) return;
-    const k = 1 / frame.scale;
-    const dx = (e.clientX - drag.x) * k;
-    const dy = (e.clientY - drag.y) * k;
-
-    if (drag.shift) {
-      // 4px 動いた時点で軸を確定する
-      if (drag.axis === null) {
-        const adx = Math.abs(e.clientX - drag.x);
-        const ady = Math.abs(e.clientY - drag.y);
-        if (adx > 4 || ady > 4) drag.axis = adx >= ady ? "x" : "y";
-      }
-      if (drag.axis === "x") onTransform({ x: drag.ox + dx, y: drag.oy });
-      else if (drag.axis === "y") onTransform({ x: drag.ox, y: drag.oy + dy });
-    } else {
-      onTransform({ x: drag.ox + dx, y: drag.oy + dy });
-    }
+    const { sx, sy } = scaleFor(iw, ih, settings, t.zoom);
+    // 画面移動量 → 出力px移動量（ox,oy）→ focus 差分（回転は近似で無視）
+    const dOx = (e.clientX - drag.x) / frame.scale;
+    const dOy = (e.clientY - drag.y) / frame.scale;
+    const fhx = t.flipH ? -1 : 1;
+    const fvy = t.flipV ? -1 : 1;
+    const dfx = -dOx / (iw * sx * fhx);
+    const dfy = -dOy / (ih * sy * fvy);
+    onTransform({ focus: { fx: clamp01(drag.fx + dfx), fy: clamp01(drag.fy + dfy) } });
   };
 
   const onPointerUp = (e: PointerEvent<HTMLDivElement>) => {
@@ -84,7 +91,7 @@ export function EditorStage({ item, settings, onTransform }: EditorStageProps) {
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onWheel={onWheel}
-          onDoubleClick={() => onTransform({ x: 0, y: 0 })}
+          onDoubleClick={() => onTransform({ focus: { fx: 0.5, fy: 0.5 } })}
         >
           <FittedThumb
             element={item.element}
@@ -104,7 +111,7 @@ export function EditorStage({ item, settings, onTransform }: EditorStageProps) {
       )}
       <div className="pointer-events-none absolute bottom-4 left-1/2 hidden -translate-x-1/2 items-center gap-[7px] rounded-full bg-[rgba(21,24,30,0.82)] px-3.5 py-[7px] text-xs font-medium text-white backdrop-blur-[4px] sm:flex">
         <Icon name="move" size={13} />
-        ドラッグで移動 ・ Shiftで軸固定 ・ ホイールで拡大縮小 ・ ダブルクリックで中央へ
+        ドラッグで焦点を移動 ・ ホイールで拡大縮小 ・ ダブルクリックで中央へ
       </div>
     </div>
   );

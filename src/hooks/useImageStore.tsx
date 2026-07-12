@@ -16,7 +16,14 @@ import {
   type ReactNode,
 } from "react";
 
-import type { ImageItem, ListLayout, OutputSettings, Step, Transform } from "@/lib/types";
+import type {
+  GlobalOutputSettings,
+  ImageItem,
+  ListLayout,
+  OutputProfile,
+  Step,
+  Transform,
+} from "@/lib/types";
 
 import { appReducer, initialState, type AppAction, type AppState } from "@/store/reducer";
 
@@ -110,8 +117,34 @@ export function useImageStore() {
     [dispatch],
   );
 
-  const setSettings = useCallback(
-    (patch: Partial<OutputSettings>) => dispatch({ type: "SET_SETTINGS", patch }),
+  const setGlobal = useCallback(
+    (patch: Partial<GlobalOutputSettings>) => dispatch({ type: "SET_GLOBAL", patch }),
+    [dispatch],
+  );
+
+  const addProfile = useCallback(
+    (profile: OutputProfile) => dispatch({ type: "ADD_PROFILE", profile }),
+    [dispatch],
+  );
+
+  const removeProfile = useCallback(
+    (id: string) => dispatch({ type: "REMOVE_PROFILE", id }),
+    [dispatch],
+  );
+
+  const updateProfile = useCallback(
+    (id: string, patch: Partial<Omit<OutputProfile, "id">>) =>
+      dispatch({ type: "UPDATE_PROFILE", id, patch }),
+    [dispatch],
+  );
+
+  const togglePreset = useCallback(
+    (profile: OutputProfile) => dispatch({ type: "TOGGLE_PRESET", profile }),
+    [dispatch],
+  );
+
+  const reorderProfiles = useCallback(
+    (from: number, to: number) => dispatch({ type: "REORDER_PROFILES", from, to }),
     [dispatch],
   );
 
@@ -146,7 +179,12 @@ export function useImageStore() {
     setImageName,
     updateTransform,
     applyTransformToAll,
-    setSettings,
+    setGlobal,
+    addProfile,
+    removeProfile,
+    updateProfile,
+    togglePreset,
+    reorderProfiles,
     setEditingId,
     setListLayout,
     setGridCellSize,

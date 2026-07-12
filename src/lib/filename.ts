@@ -13,6 +13,11 @@ function stripExtension(name: string): string {
   return name.replace(/\.[^.]+$/, "");
 }
 
+/** ラベル/フォルダー名として使う前に禁止文字を除去する */
+export function sanitizeLabel(label: string): string {
+  return label.replace(FORBIDDEN_FILENAME_CHARS, "").trim();
+}
+
 /** 出力形式に対応する拡張子（jpg/png/webp） */
 export function resolveExtension(settings: OutputSettings): string {
   const fmt = FORMATS.find((f) => f.id === settings.format);
@@ -28,6 +33,7 @@ export function resolveBaseName(
   settings: OutputSettings,
   index: number,
   total: number,
+  label = "",
 ): string {
   let base: string;
   if (item.customName && item.customName.trim()) {
@@ -38,6 +44,7 @@ export function resolveBaseName(
     const seq = String(index + 1).padStart(pad, "0");
     base = (settings.namePattern || "{name}")
       .replace(/\{name\}/g, orig)
+      .replace(/\{label\}/g, sanitizeLabel(label))
       .replace(/\{n\}/g, seq)
       .replace(/\{w\}/g, String(settings.width))
       .replace(/\{h\}/g, String(settings.height));
@@ -52,21 +59,26 @@ export function resolveFileName(
   settings: OutputSettings,
   index: number,
   total: number,
+  label = "",
 ): string {
-  return `${resolveBaseName(item, settings, index, total)}.${resolveExtension(settings)}`;
+  return `${resolveBaseName(item, settings, index, total, label)}.${resolveExtension(settings)}`;
 }
 
 /**
- * 全画像分の出力ファイル名を解決する。
+ * 全画像分の出力ファイル名を解決する（単一プロファイル分）。
  * 同名（拡張子込み）が衝突する場合は `_2`, `_3`… を付与して重複を回避する。
  */
-export function resolveFileNames(items: ImageItem[], settings: OutputSettings): string[] {
+export function resolveFileNames(
+  items: ImageItem[],
+  settings: OutputSettings,
+  label = "",
+): string[] {
   const ext = resolveExtension(settings);
   const total = items.length;
   const usedCounts = new Map<string, number>();
 
   return items.map((item, index) => {
-    const base = resolveBaseName(item, settings, index, total);
+    const base = resolveBaseName(item, settings, index, total, label);
     const used = usedCounts.get(base) ?? 0;
     usedCounts.set(base, used + 1);
     const finalBase = used === 0 ? base : `${base}_${used + 1}`;

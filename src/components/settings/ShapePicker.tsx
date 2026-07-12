@@ -3,7 +3,7 @@ import { Slider } from "@/components/ui/Slider";
 import { Icon } from "@/components/ui/Icon";
 import { RADIUS_MAX, RADIUS_MIN } from "@/lib/constants";
 import { SHAPES } from "@/lib/presets";
-import type { OutputSettings, ShapeType } from "@/lib/types";
+import type { GlobalOutputSettings, OutputSettings, ShapeType } from "@/lib/types";
 
 /** 四角・角丸・円・楕円を表す簡易グリフ */
 function ShapeGlyph({ shape }: { shape: ShapeType }) {
@@ -38,7 +38,7 @@ function ShapeGlyph({ shape }: { shape: ShapeType }) {
 
 export interface ShapePickerProps {
   settings: OutputSettings;
-  onChange: (patch: Partial<OutputSettings>) => void;
+  onChange: (patch: Partial<GlobalOutputSettings>) => void;
 }
 
 /** フレーム形状（マスク）：四角・角丸・円・楕円（仕様書 §5.2-3） */

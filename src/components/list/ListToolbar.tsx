@@ -12,8 +12,7 @@ import type { ListLayout } from "@/lib/types";
 
 export interface ListToolbarProps {
   imageCount: number;
-  width: number;
-  height: number;
+  sizeCount: number;
   layout: ListLayout;
   onLayoutChange: (layout: ListLayout) => void;
   cellSize: number;
@@ -29,8 +28,7 @@ const LAYOUT_OPTIONS = [
 /** 一覧確認画面の見出しとツール群（仕様書 §5.3 `.list-head`） */
 export function ListToolbar({
   imageCount,
-  width,
-  height,
+  sizeCount,
   layout,
   onLayoutChange,
   cellSize,
@@ -46,10 +44,9 @@ export function ListToolbar({
         subtitle={
           <>
             <span className="mono-num font-bold text-text">{imageCount}</span> 枚を{" "}
-            <span className="mono-num font-bold text-text">
-              {width}×{height}
-            </span>{" "}
-            に自動配置しました。気になる画像だけ「編集」で微調整できます。
+            <span className="mono-num font-bold text-text">{sizeCount}</span> サイズ（計{" "}
+            <span className="mono-num font-bold text-text">{imageCount * sizeCount}</span>{" "}
+            ファイル）に自動配置しました。気になる画像だけ「編集」で微調整できます。
           </>
         }
       />

@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * ダウンロード画面のZIP生成フロー（仕様書 §5.5）。
- * lib/download.ts の exportZip を呼び出し、進捗（done/results）と
+ * ダウンロード画面のZIP生成フロー（仕様書 §4.4 / §5.5）。
+ * `画像 × 出力プロファイル` の二重ループで書き出し、進捗（done/results）と
  * 完了後の再ダウンロード用 zipBlob/zipName を保持する。
  */
 
@@ -10,11 +10,12 @@ import { useCallback, useState } from "react";
 
 import { trackEvent } from "@/lib/analytics";
 import { exportSingle, exportZip, triggerDownload } from "@/lib/download";
-import type { ExportPhase, ExportResult, ImageItem, OutputSettings, ToastKind } from "@/lib/types";
+import type { ExportPhase, ExportResult, ImageItem, OutputConfig, ToastKind } from "@/lib/types";
 
 export interface UseExportResult {
   phase: ExportPhase;
   done: number;
+  total: number;
   results: ExportResult[];
   isSingle: boolean;
   start: () => Promise<void>;
@@ -23,7 +24,7 @@ export interface UseExportResult {
 
 export function useExport(
   images: ImageItem[],
-  settings: OutputSettings,
+  config: OutputConfig,
   pushToast: (message: string, kind?: ToastKind) => void,
 ): UseExportResult {
   const [phase, setPhase] = useState<ExportPhase>("ready");
@@ -31,7 +32,8 @@ export function useExport(
   const [results, setResults] = useState<ExportResult[]>([]);
   const [output, setOutput] = useState<{ blob: Blob; name: string } | null>(null);
 
-  const isSingle = images.length === 1;
+  const total = images.length * config.profiles.length;
+  const isSingle = total === 1;
 
   const start = useCallback(async () => {
     setPhase("processing");
@@ -46,37 +48,37 @@ export function useExport(
 
     try {
       if (isSingle) {
-        const { blob, name } = await exportSingle(images, settings, { onProgress });
+        const { blob, name } = await exportSingle(images, config, { onProgress });
         setOutput({ blob, name });
         setPhase("done");
         pushToast("画像をダウンロードしました");
         trackEvent("resize_export_complete", {
           image_count: images.length,
           is_zip: false,
-          format: settings.format,
-          fit_mode: settings.fit,
+          format: config.global.format,
+          fit_mode: config.global.fit,
         });
       } else {
-        const { zipBlob, zipName } = await exportZip(images, settings, { onProgress });
+        const { zipBlob, zipName } = await exportZip(images, config, { onProgress });
         setOutput({ blob: zipBlob, name: zipName });
         setPhase("done");
         pushToast("ZIPをダウンロードしました");
         trackEvent("resize_export_complete", {
           image_count: images.length,
           is_zip: true,
-          format: settings.format,
-          fit_mode: settings.fit,
+          format: config.global.format,
+          fit_mode: config.global.fit,
         });
       }
     } catch {
       setPhase("ready");
       pushToast(isSingle ? "画像の書き出しに失敗しました" : "ZIPの生成に失敗しました", "warn");
     }
-  }, [images, settings, pushToast, isSingle]);
+  }, [images, config, pushToast, isSingle]);
 
   const redownload = useCallback(() => {
     if (output) triggerDownload(output.blob, output.name);
   }, [output]);
 
-  return { phase, done, results, isSingle, start, redownload };
+  return { phase, done, total, results, isSingle, start, redownload };
 }
