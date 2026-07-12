@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 import { EditorScreen } from "@/components/editor/EditorScreen";
 import { ExportScreen } from "@/components/export/ExportScreen";
@@ -10,6 +10,7 @@ import { SettingsScreen } from "@/components/settings/SettingsScreen";
 import { ToastHost } from "@/components/ui/Toast";
 import { UploadScreen } from "@/components/upload/UploadScreen";
 import { ImageStoreProvider, useImageStore } from "@/hooks/useImageStore";
+import { checkAndSaveUnlock } from "@/lib/unlock";
 
 function WizardShell() {
   const { state } = useImageStore();
@@ -48,6 +49,8 @@ function WizardShell() {
 }
 
 export default function Home() {
+  useEffect(() => { checkAndSaveUnlock(); }, []);
+
   return (
     <ImageStoreProvider>
       <WizardShell />

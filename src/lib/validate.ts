@@ -12,6 +12,7 @@ import {
 } from "./constants";
 import { defaultTransform } from "./types";
 import type { ImageItem, RejectedFile } from "./types";
+import { isUnlocked } from "./unlock";
 
 let idCounter = 0;
 
@@ -49,7 +50,7 @@ export interface ProcessFilesResult {
 
 /**
  * 投入ファイル群を検証し、受理分を ImageItem に変換する。
- * `existingCount` は投入前に保持済みの画像枚数（合計100枚の上限判定に使用）。
+ * `existingCount` は投入前に保持済みの画像枚数（合計20枚の上限判定に使用）。
  */
 export async function processFiles(
   files: File[],
@@ -60,8 +61,8 @@ export async function processFiles(
   let count = existingCount;
 
   for (const file of files) {
-    if (count >= MAX_FILE_COUNT) {
-      rejected.push({ name: file.name, reason: "count", message: "上限100枚を超えています" });
+    if (!isUnlocked() && count >= MAX_FILE_COUNT) {
+      rejected.push({ name: file.name, reason: "count", message: "上限20枚を超えています" });
       continue;
     }
     if (!isAcceptedMime(file.type)) {

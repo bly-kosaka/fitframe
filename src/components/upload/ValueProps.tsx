@@ -7,7 +7,7 @@ interface ValueProp {
 }
 
 const VALUE_PROPS: ValueProp[] = [
-  { icon: "layers", title: "複数画像を一括処理", desc: "何十枚でもまとめてリサイズ" },
+  { icon: "layers", title: "複数画像を一括処理", desc: "最大20枚をまとめてリサイズ" },
   { icon: "crop", title: "Cover / Contain / Stretch", desc: "枠への収め方を選ぶだけ" },
   { icon: "image", title: "四角・角丸・円・楕円", desc: "用途に合わせたマスク" },
   { icon: "zip", title: "ZIPで一括ダウンロード", desc: "1クリックでまとめて保存" },
