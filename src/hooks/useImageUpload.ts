@@ -12,7 +12,7 @@ import { DECODED_MEMORY_WARNING_BYTES } from "@/lib/constants";
 import { createDemoImages } from "@/lib/demo";
 import { formatBytes } from "@/lib/format";
 import type { RejectedFile } from "@/lib/types";
-import { processFiles } from "@/lib/validate";
+import { processFiles, type ProcessProgress } from "@/lib/validate";
 
 import { useImageStore } from "./useImageStore";
 import { useToasts } from "./useToasts";
@@ -20,6 +20,7 @@ import { useToasts } from "./useToasts";
 export interface UseImageUploadResult {
   rejectedFiles: RejectedFile[];
   isProcessing: boolean;
+  progress: ProcessProgress | null;
   handleFiles: (files: File[]) => Promise<void>;
   handleDemo: () => Promise<void>;
   dismissRejected: () => void;
@@ -30,13 +31,16 @@ export function useImageUpload(): UseImageUploadResult {
   const { pushToast } = useToasts();
   const [rejectedFiles, setRejectedFiles] = useState<RejectedFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState<ProcessProgress | null>(null);
 
   const handleFiles = useCallback(
     async (files: File[]) => {
       if (files.length === 0) return;
       setIsProcessing(true);
-      const { accepted, rejected } = await processFiles(files, state.images.length);
+      setProgress({ done: 0, total: files.length, phase: "decoding" });
+      const { accepted, rejected } = await processFiles(files, state.images.length, setProgress);
       setIsProcessing(false);
+      setProgress(null);
       setRejectedFiles(rejected);
 
       if (accepted.length > 0) {
@@ -81,5 +85,5 @@ export function useImageUpload(): UseImageUploadResult {
 
   const dismissRejected = useCallback(() => setRejectedFiles([]), []);
 
-  return { rejectedFiles, isProcessing, handleFiles, handleDemo, dismissRejected };
+  return { rejectedFiles, isProcessing, progress, handleFiles, handleDemo, dismissRejected };
 }

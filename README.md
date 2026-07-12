@@ -38,7 +38,7 @@
 
 ## 制限値（バリデーション）
 
-- 入力対応形式: JPEG / PNG / WebP / AVIF / GIF / BMP（GIFはアニメ非対応・1コマ目のみ変換。HEIC/HEIFは未対応）
+- 入力対応形式: JPEG / PNG / WebP / AVIF / GIF / BMP / HEIC / HEIF（GIFはアニメ非対応・1コマ目のみ変換。HEIC/HEIFは取り込み時にheic-toでPNGへ変換）
 - 出力形式: JPEG / PNG / WebP
 - 1ファイルあたり最大20MB
 - 画像の最大サイズ: 10000 × 10000 px

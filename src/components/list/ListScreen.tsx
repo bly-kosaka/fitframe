@@ -1,14 +1,15 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { FooterBar } from "@/components/layout/FooterBar";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
+import { UploadProgress } from "@/components/upload/UploadProgress";
 import { useImageStore } from "@/hooks/useImageStore";
 import { useToasts } from "@/hooks/useToasts";
 import { repSettings } from "@/lib/presets";
-import { processFiles } from "@/lib/validate";
+import { processFiles, type ProcessProgress } from "@/lib/validate";
 
 import { ImageGrid } from "./ImageGrid";
 import { ImageRow } from "./ImageRow";
@@ -27,6 +28,7 @@ export function ListScreen() {
     setGridCellSize,
   } = useImageStore();
   const { pushToast } = useToasts();
+  const [progress, setProgress] = useState<ProcessProgress | null>(null);
   const { images, config, listLayout, gridCellSize } = state;
   const settings = repSettings(config);
   const repProfileId = config.profiles[0]?.id ?? "";
@@ -44,7 +46,9 @@ export function ListScreen() {
 
   const handleAddFiles = useCallback(
     async (files: File[]) => {
-      const { accepted, rejected } = await processFiles(files, images.length);
+      setProgress({ done: 0, total: files.length, phase: "decoding" });
+      const { accepted, rejected } = await processFiles(files, images.length, setProgress);
+      setProgress(null);
       if (accepted.length > 0) {
         addImages(accepted);
         pushToast(`${accepted.length} 枚を追加しました`);
@@ -68,6 +72,9 @@ export function ListScreen() {
           onCellSizeChange={setGridCellSize}
           onAddFiles={handleAddFiles}
         />
+        <div className="mx-auto max-w-[1100px]">
+          <UploadProgress progress={progress} />
+        </div>
         {images.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-20 text-text-3">
             <Icon name="image" size={30} />

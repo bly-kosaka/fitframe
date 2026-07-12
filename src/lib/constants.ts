@@ -3,10 +3,11 @@
  */
 
 // ---------- セキュリティ / バリデーション（仕様書 §7） ----------
-// いずれもブラウザが <img> でネイティブデコード可能な形式のみ。出力時は
-// JPG/PNG/WebP へ再エンコードするため、入力を許可するだけで既存の書き出し
-// パイプラインに乗る。GIF は 1 フレーム目のみ変換される（アニメは失われる）。
-// ※ HEIC/HEIF は <img> でデコードできないため未対応（別途 WASM デコーダが必要）。
+// JPEG/PNG/WebP/AVIF/GIF/BMP はブラウザが <img> でネイティブデコード可能。
+// 出力時は JPG/PNG/WebP へ再エンコードするため、入力を許可するだけで既存の
+// 書き出しパイプラインに乗る。GIF は 1 フレーム目のみ変換される（アニメは失われる）。
+// HEIC/HEIF は <img> でデコードできないため、validate.ts で heic-to により
+// PNG へ変換してから取り込む（変換ヘルパー: src/lib/heic.ts）。
 export const ACCEPTED_MIME_TYPES = [
   "image/jpeg",
   "image/png",
@@ -14,6 +15,8 @@ export const ACCEPTED_MIME_TYPES = [
   "image/avif",
   "image/gif",
   "image/bmp",
+  "image/heic",
+  "image/heif",
 ] as const;
 export const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
 export const MAX_DIMENSION_PX = 10000; // 10000 x 10000 px まで

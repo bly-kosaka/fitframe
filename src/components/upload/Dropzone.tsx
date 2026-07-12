@@ -7,9 +7,17 @@ import { Icon } from "@/components/ui/Icon";
 import { ACCEPTED_MIME_TYPES } from "@/lib/constants";
 
 // react-dropzone の accept 形式（{ mime: 拡張子[] }）を検証の真実源から導出する。
-const ACCEPT = Object.fromEntries(ACCEPTED_MIME_TYPES.map((mime) => [mime, []]));
+// HEIC/HEIF は OS が MIME を空で返すことがあるため、拡張子ヒントも与えて
+// ファイル選択ダイアログに確実に表示させる。
+const HEIC_EXT: Record<string, string[]> = {
+  "image/heic": [".heic"],
+  "image/heif": [".heif"],
+};
+const ACCEPT = Object.fromEntries(
+  ACCEPTED_MIME_TYPES.map((mime) => [mime, HEIC_EXT[mime] ?? []]),
+);
 
-const FORMAT_LABELS = ["JPG", "PNG", "WebP", "AVIF", "GIF", "BMP"];
+const FORMAT_LABELS = ["JPG", "PNG", "WebP", "AVIF", "HEIC", "GIF", "BMP"];
 
 export interface DropzoneProps {
   onFiles: (files: File[]) => void;

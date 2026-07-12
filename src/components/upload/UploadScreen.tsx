@@ -8,11 +8,12 @@ import { useToasts } from "@/hooks/useToasts";
 
 import { Dropzone } from "./Dropzone";
 import { RejectedList } from "./RejectedList";
+import { UploadProgress } from "./UploadProgress";
 import { ValueProps } from "./ValueProps";
 
 /** アップロード画面：中央レイアウト（ヒーロー → ドロップゾーン → 価値訴求 → 信頼行）（仕様書 §5.1） */
 export function UploadScreen() {
-  const { rejectedFiles, isProcessing, handleFiles, handleDemo, dismissRejected } =
+  const { rejectedFiles, isProcessing, progress, handleFiles, handleDemo, dismissRejected } =
     useImageUpload();
   const { pushToast } = useToasts();
 
@@ -83,7 +84,10 @@ export function UploadScreen() {
 
       <div className="mb-[30px]">
         <Dropzone onFiles={handleFiles} onDemo={handleDemo} onClipboard={handleClipboard} big />
-        {isProcessing && <p className="mt-3 text-center text-[12.5px] text-text-3">読み込み中…</p>}
+        {isProcessing && !progress && (
+          <p className="mt-3 text-center text-[12.5px] text-text-3">読み込み中…</p>
+        )}
+        <UploadProgress progress={progress} />
       </div>
 
       <RejectedList items={rejectedFiles} onDismiss={dismissRejected} />
