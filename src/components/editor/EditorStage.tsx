@@ -22,6 +22,10 @@ interface DragState {
   y: number;
   fx: number;
   fy: number;
+  /** ドラッグ開始時に Shift が押されていたか（軸固定モード） */
+  shift: boolean;
+  /** Shift モード時に最初の動きで確定する固定軸 */
+  axis: "x" | "y" | null;
 }
 
 const ZOOM_WHEEL_FACTOR = 1.06;
@@ -50,7 +54,14 @@ export function EditorStage({ item, settings, transform, onTransform }: EditorSt
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (!frame) return;
     e.currentTarget.setPointerCapture(e.pointerId);
-    dragRef.current = { x: e.clientX, y: e.clientY, fx: t.focus.fx, fy: t.focus.fy };
+    dragRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      fx: t.focus.fx,
+      fy: t.focus.fy,
+      shift: e.shiftKey,
+      axis: null,
+    };
   };
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -62,8 +73,22 @@ export function EditorStage({ item, settings, transform, onTransform }: EditorSt
     const dOy = (e.clientY - drag.y) / frame.scale;
     const fhx = t.flipH ? -1 : 1;
     const fvy = t.flipV ? -1 : 1;
-    const dfx = -dOx / (iw * sx * fhx);
-    const dfy = -dOy / (ih * sy * fvy);
+    let dfx = -dOx / (iw * sx * fhx);
+    let dfy = -dOy / (ih * sy * fvy);
+    // Shift 中は最初の動き（画面上4px超）で固定軸を確定し、一方向だけに移動を制限する
+    if (drag.shift) {
+      if (drag.axis === null) {
+        const adx = Math.abs(e.clientX - drag.x);
+        const ady = Math.abs(e.clientY - drag.y);
+        if (adx > 4 || ady > 4) drag.axis = adx >= ady ? "x" : "y";
+      }
+      if (drag.axis === "x") dfy = 0;
+      else if (drag.axis === "y") dfx = 0;
+      else {
+        dfx = 0; // 軸未確定の間は動かさない
+        dfy = 0;
+      }
+    }
     onTransform({ focus: { fx: clamp01(drag.fx + dfx), fy: clamp01(drag.fy + dfy) } });
   };
 
@@ -113,7 +138,7 @@ export function EditorStage({ item, settings, transform, onTransform }: EditorSt
       )}
       <div className="pointer-events-none absolute bottom-4 left-1/2 hidden -translate-x-1/2 items-center gap-[7px] rounded-full bg-[rgba(21,24,30,0.82)] px-3.5 py-[7px] text-xs font-medium text-white backdrop-blur-[4px] sm:flex">
         <Icon name="move" size={13} />
-        ドラッグで焦点を移動 ・ ホイールで拡大縮小 ・ ダブルクリックで中央へ
+        ドラッグで焦点を移動 ・ Shiftで軸固定 ・ ホイールで拡大縮小 ・ ダブルクリックで中央へ
       </div>
     </div>
   );
