@@ -3,7 +3,18 @@
  */
 
 // ---------- セキュリティ / バリデーション（仕様書 §7） ----------
-export const ACCEPTED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+// いずれもブラウザが <img> でネイティブデコード可能な形式のみ。出力時は
+// JPG/PNG/WebP へ再エンコードするため、入力を許可するだけで既存の書き出し
+// パイプラインに乗る。GIF は 1 フレーム目のみ変換される（アニメは失われる）。
+// ※ HEIC/HEIF は <img> でデコードできないため未対応（別途 WASM デコーダが必要）。
+export const ACCEPTED_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+  "image/gif",
+  "image/bmp",
+] as const;
 export const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
 export const MAX_DIMENSION_PX = 10000; // 10000 x 10000 px まで
 export const MAX_FILE_COUNT = 20; // 合計20枚まで

@@ -4,14 +4,12 @@ import { useCallback } from "react";
 import { useDropzone, type FileRejection } from "react-dropzone";
 
 import { Icon } from "@/components/ui/Icon";
+import { ACCEPTED_MIME_TYPES } from "@/lib/constants";
 
-const ACCEPT = {
-  "image/jpeg": [],
-  "image/png": [],
-  "image/webp": [],
-};
+// react-dropzone の accept 形式（{ mime: 拡張子[] }）を検証の真実源から導出する。
+const ACCEPT = Object.fromEntries(ACCEPTED_MIME_TYPES.map((mime) => [mime, []]));
 
-const FORMAT_LABELS = ["JPG", "PNG", "WebP"];
+const FORMAT_LABELS = ["JPG", "PNG", "WebP", "AVIF", "GIF", "BMP"];
 
 export interface DropzoneProps {
   onFiles: (files: File[]) => void;
@@ -70,6 +68,9 @@ export function Dropzone({ onFiles, onDemo, onClipboard, big = false }: Dropzone
             {f}
           </span>
         ))}
+      </div>
+      <div className="mb-5 -mt-3 text-[11.5px] text-text-3">
+        ※ GIF は 1 コマ目のみ変換されます
       </div>
       <div className="flex flex-wrap justify-center gap-2">
         <button
