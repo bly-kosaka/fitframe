@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 
 import { computeStageFrame, renderBackdropCanvas, type StageFrame } from "@/lib/fit";
-import type { ImageItem, OutputSettings } from "@/lib/types";
+import type { ImageItem, OutputSettings, Transform } from "@/lib/types";
 
 export interface UseFittedCanvasResult {
   stageRef: RefObject<HTMLDivElement>;
@@ -14,8 +14,13 @@ export interface UseFittedCanvasResult {
 /**
  * 編集画面のステージ：要素サイズの追従と、出力枠の表示矩形の算出、
  * 枠外の元画像を薄く描く背景キャンバスの再描画をまとめて行う。
+ * `transform` は選択中プロファイルの解決済みトランスフォーム。
  */
-export function useFittedCanvas(item: ImageItem, settings: OutputSettings): UseFittedCanvasResult {
+export function useFittedCanvas(
+  item: ImageItem,
+  settings: OutputSettings,
+  transform: Transform,
+): UseFittedCanvasResult {
   const stageRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLCanvasElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
@@ -30,7 +35,6 @@ export function useFittedCanvas(item: ImageItem, settings: OutputSettings): UseF
   }, []);
 
   const frame = size.w > 0 && size.h > 0 ? computeStageFrame(size.w, size.h, settings) : null;
-  const { transform } = item;
 
   useEffect(() => {
     const canvas = backdropRef.current;

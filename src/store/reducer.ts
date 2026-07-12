@@ -6,7 +6,7 @@
 
 import { GRID_CELL_DEFAULT, PROFILE_MAX_COUNT } from "@/lib/constants";
 import { createProfileId, defaultConfig } from "@/lib/presets";
-import { defaultTransform } from "@/lib/types";
+import { isDefaultTransform, resolveTransform } from "@/lib/types";
 import type {
   GlobalOutputSettings,
   ImageItem,
@@ -42,11 +42,13 @@ export type AppAction =
   | { type: "SET_STEP"; step: Step }
   | { type: "ADD_IMAGES"; items: ImageItem[] }
   | { type: "REMOVE_IMAGE"; id: string }
-  | { type: "RESET_IMAGE"; id: string }
-  | { type: "RESET_ALL_TRANSFORMS" }
+  /** profileId 指定でそのサイズのみ、未指定で画像の全サイズを自動配置に戻す */
+  | { type: "RESET_IMAGE"; id: string; profileId?: string }
   | { type: "SET_IMAGE_NAME"; id: string; name: string }
-  | { type: "UPDATE_TRANSFORM"; id: string; patch: Partial<Transform> }
-  | { type: "APPLY_TRANSFORM_TO_ALL"; zoom: number; rotation: number; resetPosition: boolean }
+  /** 選択中プロファイル（profileId）の個別トランスフォームを更新する */
+  | { type: "UPDATE_TRANSFORM"; id: string; profileId: string; patch: Partial<Transform> }
+  /** あるプロファイルの調整を、その画像の全プロファイルへコピーする */
+  | { type: "APPLY_PROFILE_TO_ALL"; id: string; profileId: string }
   | { type: "SET_GLOBAL"; patch: Partial<GlobalOutputSettings> }
   | { type: "ADD_PROFILE"; profile: OutputProfile }
   | { type: "REMOVE_PROFILE"; id: string }
@@ -60,16 +62,9 @@ export type AppAction =
   | { type: "ADD_TOAST"; toast: Toast }
   | { type: "REMOVE_TOAST"; id: string };
 
-/** 自動配置（defaultTransform）から変更されているかどうか */
-function isDefaultTransform(t: Transform): boolean {
-  return (
-    t.focus.fx === 0.5 &&
-    t.focus.fy === 0.5 &&
-    t.zoom === 1 &&
-    t.rotation === 0 &&
-    !t.flipH &&
-    !t.flipV
-  );
+/** いずれかのプロファイルが自動配置から個別調整されているか */
+function anyEdited(overrides: Record<string, Transform> | undefined): boolean {
+  return !!overrides && Object.values(overrides).some((t) => !isDefaultTransform(t));
 }
 
 /** プロファイル配列を更新するヘルパー。
@@ -99,19 +94,19 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case "RESET_IMAGE":
       return {
         ...state,
-        images: state.images.map((item) =>
-          item.id === action.id ? { ...item, transform: defaultTransform(), edited: false } : item,
-        ),
-      };
-
-    case "RESET_ALL_TRANSFORMS":
-      return {
-        ...state,
-        images: state.images.map((item) => ({
-          ...item,
-          transform: defaultTransform(),
-          edited: false,
-        })),
+        images: state.images.map((item) => {
+          if (item.id !== action.id) return item;
+          let overrides: Record<string, Transform> | undefined;
+          if (action.profileId) {
+            // 指定サイズのみ自動配置へ
+            overrides = { ...item.overrides };
+            delete overrides[action.profileId];
+          } else {
+            // 画像の全サイズを自動配置へ
+            overrides = {};
+          }
+          return { ...item, overrides, edited: anyEdited(overrides) };
+        }),
       };
 
     case "SET_IMAGE_NAME":
@@ -129,24 +124,27 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         images: state.images.map((item) => {
           if (item.id !== action.id) return item;
-          const transform = { ...item.transform, ...action.patch };
-          return { ...item, transform, edited: !isDefaultTransform(transform) };
+          const current = resolveTransform(item, action.profileId);
+          const next: Transform = { ...current, ...action.patch };
+          const overrides = { ...item.overrides, [action.profileId]: next };
+          return { ...item, overrides, edited: anyEdited(overrides) };
         }),
       };
 
-    case "APPLY_TRANSFORM_TO_ALL":
+    case "APPLY_PROFILE_TO_ALL": {
+      // 選択中プロファイルの調整を、その画像の全プロファイルへコピーする
+      const src = state.images.find((im) => im.id === action.id);
+      if (!src) return state;
+      const t = resolveTransform(src, action.profileId);
+      const overrides: Record<string, Transform> = {};
+      for (const p of state.config.profiles) overrides[p.id] = { ...t };
       return {
         ...state,
-        images: state.images.map((item) => {
-          const transform: Transform = {
-            ...item.transform,
-            zoom: action.zoom,
-            rotation: action.rotation,
-            ...(action.resetPosition ? { focus: { fx: 0.5, fy: 0.5 } } : {}),
-          };
-          return { ...item, transform, edited: !isDefaultTransform(transform) };
-        }),
+        images: state.images.map((item) =>
+          item.id === action.id ? { ...item, overrides, edited: anyEdited(overrides) } : item,
+        ),
       };
+    }
 
     case "SET_GLOBAL":
       return { ...state, config: { ...state.config, global: { ...state.config.global, ...action.patch } } };

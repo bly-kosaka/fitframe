@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { useImageStore } from "@/hooks/useImageStore";
 import { toSettings } from "@/lib/presets";
+import { isProfileEdited, resolveTransform } from "@/lib/types";
 
 import { EditorNav } from "./EditorNav";
 import { EditorPanel } from "./EditorPanel";
@@ -12,7 +13,7 @@ import { EditorStage } from "./EditorStage";
 
 /** 個別編集画面：焦点・拡大率・回転・反転・ファイル名を調整する。全出力サイズを同時確認できる（仕様書 §4.3） */
 export function EditorScreen() {
-  const { state, setEditingId, updateTransform, resetImage, setImageName, goToStep } =
+  const { state, setEditingId, updateTransform, resetImage, setImageName, applyProfileToAll, goToStep } =
     useImageStore();
   const { images, config, editingId } = state;
   const { profiles, global } = config;
@@ -57,6 +58,9 @@ export function EditorScreen() {
   if (!item || !selProfile) return null;
 
   const selSettings = toSettings(global, selProfile);
+  const selTransform = resolveTransform(item, selProfile.id);
+  const selEdited = isProfileEdited(item, selProfile.id);
+  const multiProfile = profiles.length > 1;
 
   return (
     <div className="flex min-h-0 flex-1 animate-screen-fade flex-col bg-canvas">
@@ -64,10 +68,11 @@ export function EditorScreen() {
         item={item}
         index={index}
         total={images.length}
+        canReset={selEdited}
         onBack={() => goToStep("list")}
         onPrev={goPrev}
         onNext={goNext}
-        onReset={() => resetImage(item.id)}
+        onReset={() => resetImage(item.id, selProfile.id)}
         onDone={() => goToStep("list")}
       />
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">
@@ -76,9 +81,10 @@ export function EditorScreen() {
             key={`${item.id}-${selProfile.id}`}
             item={item}
             settings={selSettings}
-            onTransform={(patch) => updateTransform(item.id, patch)}
+            transform={selTransform}
+            onTransform={(patch) => updateTransform(item.id, selProfile.id, patch)}
           />
-          {profiles.length > 1 && (
+          {multiProfile && (
             <EditorProfileStrip
               item={item}
               profiles={profiles}
@@ -94,8 +100,12 @@ export function EditorScreen() {
           index={index}
           total={images.length}
           label={selProfile.label}
-          onTransform={(patch) => updateTransform(item.id, patch)}
+          transform={selTransform}
+          edited={selEdited}
+          multiProfile={multiProfile}
+          onTransform={(patch) => updateTransform(item.id, selProfile.id, patch)}
           onName={setImageName}
+          onApplyToAll={() => applyProfileToAll(item.id, selProfile.id)}
         />
       </div>
     </div>

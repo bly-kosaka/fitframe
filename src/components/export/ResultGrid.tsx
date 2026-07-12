@@ -2,6 +2,7 @@ import { FittedThumb } from "@/components/ui/FittedThumb";
 import { RESULT_THUMB_MAX_DIM } from "@/lib/constants";
 import { shapeRadiusCSS } from "@/lib/fit";
 import { toSettings } from "@/lib/presets";
+import { resolveTransform } from "@/lib/types";
 import type { ExportResult, ImageItem, OutputConfig } from "@/lib/types";
 
 export interface ResultGridProps {
@@ -35,7 +36,7 @@ export function ResultGrid({ images, config, results }: ResultGridProps) {
             <FittedThumb
               element={item.element}
               settings={s}
-              transform={item.transform}
+              transform={resolveTransform(item, profile.id)}
               maxDim={RESULT_THUMB_MAX_DIM}
             />
           </div>

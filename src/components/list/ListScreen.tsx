@@ -29,6 +29,7 @@ export function ListScreen() {
   const { pushToast } = useToasts();
   const { images, config, listLayout, gridCellSize } = state;
   const settings = repSettings(config);
+  const repProfileId = config.profiles[0]?.id ?? "";
   const sizeCount = config.profiles.length;
 
   const editedCount = images.filter((item) => item.edited).length;
@@ -83,6 +84,7 @@ export function ListScreen() {
                 item={item}
                 index={i}
                 settings={settings}
+                repProfileId={repProfileId}
                 onEdit={openEdit}
                 onReset={resetImage}
                 onRemove={removeImage}
@@ -93,6 +95,7 @@ export function ListScreen() {
           <ImageGrid
             images={images}
             settings={settings}
+            repProfileId={repProfileId}
             cellSize={gridCellSize}
             onEdit={openEdit}
             onReset={resetImage}

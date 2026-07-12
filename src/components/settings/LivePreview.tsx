@@ -3,6 +3,7 @@ import { STRIP_THUMB_MAX_DIM } from "@/lib/constants";
 import { shapeRadiusCSS } from "@/lib/fit";
 import { estimateBytes, formatBytes } from "@/lib/format";
 import { toSettings } from "@/lib/presets";
+import { resolveTransform } from "@/lib/types";
 import type { ImageItem, OutputConfig } from "@/lib/types";
 
 export interface LivePreviewProps {
@@ -66,7 +67,7 @@ export function LivePreview({ config, images }: LivePreviewProps) {
                       <FittedThumb
                         element={rep.element}
                         settings={s}
-                        transform={rep.transform}
+                        transform={resolveTransform(rep, p.id)}
                         maxDim={STRIP_THUMB_MAX_DIM * 3}
                       />
                     </div>

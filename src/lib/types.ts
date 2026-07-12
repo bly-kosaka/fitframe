@@ -39,10 +39,16 @@ export interface ImageItem {
   element: HTMLImageElement;
   naturalWidth: number;
   naturalHeight: number;
+  /** 自動配置の基準（フォールバック）。個別調整前は全プロファイルがこれを使う。 */
   transform: Transform;
+  /**
+   * 出力プロファイルごとの個別トランスフォーム（プロファイルID→Transform）。
+   * 既定は「サイズごとに個別」。未設定のプロファイルは `transform`（自動配置）を使う（仕様書 §4.3 改訂）。
+   */
+  overrides?: Record<string, Transform>;
   /** 個別ファイル名（拡張子なし）。未設定ならファイル名ルールを適用 */
   customName?: string;
-  /** 自動配置から変更されたか */
+  /** いずれかのプロファイルが自動配置から変更されているか */
   edited: boolean;
 }
 
@@ -140,3 +146,26 @@ export const defaultTransform = (): Transform => ({
   flipH: false,
   flipV: false,
 });
+
+/** 自動配置（defaultTransform）から変更されているか */
+export function isDefaultTransform(t: Transform): boolean {
+  return (
+    t.focus.fx === 0.5 &&
+    t.focus.fy === 0.5 &&
+    t.zoom === 1 &&
+    t.rotation === 0 &&
+    !t.flipH &&
+    !t.flipV
+  );
+}
+
+/** 指定プロファイルに適用する Transform を解決する（個別調整があればそれ、なければ自動配置） */
+export function resolveTransform(item: ImageItem, profileId: string): Transform {
+  return item.overrides?.[profileId] ?? item.transform;
+}
+
+/** 指定プロファイルが自動配置から個別調整されているか */
+export function isProfileEdited(item: ImageItem, profileId: string): boolean {
+  const o = item.overrides?.[profileId];
+  return !!o && !isDefaultTransform(o);
+}

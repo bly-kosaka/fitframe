@@ -6,6 +6,8 @@ export interface EditorNavProps {
   item: ImageItem;
   index: number;
   total: number;
+  /** 選択中サイズが個別調整されているか（リセットの活性判定） */
+  canReset: boolean;
   onBack: () => void;
   onPrev: () => void;
   onNext: () => void;
@@ -13,11 +15,12 @@ export interface EditorNavProps {
   onDone: () => void;
 }
 
-/** 編集画面の上部バー：一覧へ戻る、前後ナビゲーション、リセット・完了（仕様書 §5.4） */
+/** 編集画面の上部バー：一覧へ戻る、前後ナビゲーション、リセット・完了（仕様書 §4.3） */
 export function EditorNav({
   item,
   index,
   total,
+  canReset,
   onBack,
   onPrev,
   onNext,
@@ -50,9 +53,9 @@ export function EditorNav({
         </Button>
       </div>
       <div className="flex gap-1 sm:gap-2">
-        <Button variant="ghost" size="sm" disabled={!item.edited} onClick={onReset}>
+        <Button variant="ghost" size="sm" disabled={!canReset} onClick={onReset} title="このサイズを自動配置に戻す">
           <Icon name="reset" size={15} />
-          <span className="hidden sm:inline">自動配置に戻す</span>
+          <span className="hidden sm:inline">このサイズを戻す</span>
         </Button>
         <Button variant="primary" size="sm" onClick={onDone}>
           <Icon name="check" size={15} stroke={2.6} />

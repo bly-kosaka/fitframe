@@ -3,6 +3,7 @@
 import { FittedThumb } from "@/components/ui/FittedThumb";
 import { Icon } from "@/components/ui/Icon";
 import { shapeRadiusCSS } from "@/lib/fit";
+import { resolveTransform } from "@/lib/types";
 import type { ImageItem, OutputSettings } from "@/lib/types";
 
 import { StatusBadge } from "./StatusBadge";
@@ -10,6 +11,8 @@ import { StatusBadge } from "./StatusBadge";
 export interface ImageCardProps {
   item: ImageItem;
   settings: OutputSettings;
+  /** 代表プロファイルID（サムネの解決用） */
+  repProfileId: string;
   cellSize: number;
   onEdit: (id: string) => void;
   onReset: (id: string) => void;
@@ -17,7 +20,7 @@ export interface ImageCardProps {
 }
 
 /** グリッド表示の1枚カード（仕様書 §5.3 `.thumb-card`） */
-export function ImageCard({ item, settings, cellSize, onEdit, onReset, onRemove }: ImageCardProps) {
+export function ImageCard({ item, settings, repProfileId, cellSize, onEdit, onReset, onRemove }: ImageCardProps) {
   const frameStyle = {
     aspectRatio: `${settings.width} / ${settings.height}`,
     borderRadius: shapeRadiusCSS(
@@ -41,7 +44,7 @@ export function ImageCard({ item, settings, cellSize, onEdit, onReset, onRemove 
           <FittedThumb
             element={item.element}
             settings={settings}
-            transform={item.transform}
+            transform={resolveTransform(item, repProfileId)}
             maxDim={480}
           />
         </div>

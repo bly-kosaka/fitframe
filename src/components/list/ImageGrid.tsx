@@ -5,6 +5,7 @@ import { ImageCard } from "./ImageCard";
 export interface ImageGridProps {
   images: ImageItem[];
   settings: OutputSettings;
+  repProfileId: string;
   cellSize: number;
   onEdit: (id: string) => void;
   onReset: (id: string) => void;
@@ -15,6 +16,7 @@ export interface ImageGridProps {
 export function ImageGrid({
   images,
   settings,
+  repProfileId,
   cellSize,
   onEdit,
   onReset,
@@ -30,6 +32,7 @@ export function ImageGrid({
           key={item.id}
           item={item}
           settings={settings}
+          repProfileId={repProfileId}
           cellSize={cellSize}
           onEdit={onEdit}
           onReset={onReset}

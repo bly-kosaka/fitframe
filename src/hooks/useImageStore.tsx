@@ -94,10 +94,8 @@ export function useImageStore() {
     [dispatch, state.images],
   );
 
-  const resetImage = useCallback((id: string) => dispatch({ type: "RESET_IMAGE", id }), [dispatch]);
-
-  const resetAllTransforms = useCallback(
-    () => dispatch({ type: "RESET_ALL_TRANSFORMS" }),
+  const resetImage = useCallback(
+    (id: string, profileId?: string) => dispatch({ type: "RESET_IMAGE", id, profileId }),
     [dispatch],
   );
 
@@ -107,13 +105,13 @@ export function useImageStore() {
   );
 
   const updateTransform = useCallback(
-    (id: string, patch: Partial<Transform>) => dispatch({ type: "UPDATE_TRANSFORM", id, patch }),
+    (id: string, profileId: string, patch: Partial<Transform>) =>
+      dispatch({ type: "UPDATE_TRANSFORM", id, profileId, patch }),
     [dispatch],
   );
 
-  const applyTransformToAll = useCallback(
-    (zoom: number, rotation: number, resetPosition: boolean) =>
-      dispatch({ type: "APPLY_TRANSFORM_TO_ALL", zoom, rotation, resetPosition }),
+  const applyProfileToAll = useCallback(
+    (id: string, profileId: string) => dispatch({ type: "APPLY_PROFILE_TO_ALL", id, profileId }),
     [dispatch],
   );
 
@@ -175,10 +173,9 @@ export function useImageStore() {
     addImages,
     removeImage,
     resetImage,
-    resetAllTransforms,
     setImageName,
     updateTransform,
-    applyTransformToAll,
+    applyProfileToAll,
     setGlobal,
     addProfile,
     removeProfile,

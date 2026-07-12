@@ -19,8 +19,15 @@ export interface EditorPanelProps {
   total: number;
   /** 選択中プロファイルのラベル */
   label: string;
+  /** 選択中プロファイルの解決済みトランスフォーム */
+  transform: Transform;
+  /** 選択中プロファイルが個別調整されているか */
+  edited: boolean;
+  /** 出力サイズが複数あるか */
+  multiProfile: boolean;
   onTransform: (patch: Partial<Transform>) => void;
   onName: (id: string, name: string) => void;
+  onApplyToAll: () => void;
 }
 
 /** 編集画面の右パネル：選択中プロファイルの要約と調整コントロール（仕様書 §4.3） */
@@ -30,8 +37,12 @@ export function EditorPanel({
   index,
   total,
   label,
+  transform,
+  edited,
+  multiProfile,
   onTransform,
   onName,
+  onApplyToAll,
 }: EditorPanelProps) {
   const fitLabel = FIT_MODES.find((f) => f.id === settings.fit)?.label ?? "";
   const shapeLabel = SHAPES.find((s) => s.id === settings.shape)?.label ?? "";
@@ -51,9 +62,9 @@ export function EditorPanel({
       >
         <span className="text-[13px] font-semibold text-text-2">編集コントロール</span>
         <div className="flex items-center gap-2">
-          {item.edited && (
+          {edited && (
             <Pill variant="accent" className="text-[11px]">
-              調整済み
+              このサイズ調整済み
             </Pill>
           )}
           <Icon
@@ -81,7 +92,7 @@ export function EditorPanel({
           <FittedThumb
             element={item.element}
             settings={settings}
-            transform={item.transform}
+            transform={transform}
             maxDim={EDITOR_PANEL_THUMB_MAX_DIM}
           />
         </div>
@@ -95,9 +106,9 @@ export function EditorPanel({
           <div className="mt-0.5 text-xs text-text-3">
             {fitLabel} ・ {shapeLabel}
           </div>
-          {item.edited ? (
+          {edited ? (
             <Pill variant="accent" className="mt-1.5">
-              調整済み
+              このサイズ調整済み
             </Pill>
           ) : (
             <Pill variant="ok" className="mt-1.5">
@@ -115,8 +126,11 @@ export function EditorPanel({
           index={index}
           total={total}
           label={label}
+          transform={transform}
+          multiProfile={multiProfile}
           onTransform={onTransform}
           onName={onName}
+          onApplyToAll={onApplyToAll}
         />
       </div>
     </aside>

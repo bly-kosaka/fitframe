@@ -43,8 +43,13 @@ export interface EditorControlsProps {
   total: number;
   /** 選択中プロファイルのラベル（ファイル名例の {label} 用） */
   label: string;
+  /** 選択中プロファイルの解決済みトランスフォーム */
+  transform: Transform;
+  /** 出力サイズが複数あるか（「全サイズに適用」ボタンの表示条件） */
+  multiProfile: boolean;
   onTransform: (patch: Partial<Transform>) => void;
   onName: (id: string, name: string) => void;
+  onApplyToAll: () => void;
 }
 
 const ZOOM_SLIDER_MAX = 4;
@@ -75,10 +80,13 @@ export function EditorControls({
   index,
   total,
   label,
+  transform,
+  multiProfile,
   onTransform,
   onName,
+  onApplyToAll,
 }: EditorControlsProps) {
-  const t = item.transform;
+  const t = transform;
   const ext = FORMATS.find((f) => f.id === settings.format)?.ext ?? "png";
   const ruleFileName = resolveFileName({ ...item, customName: undefined }, settings, index, total, label);
   const ruleName = ruleFileName.replace(/\.[^.]+$/, "");
@@ -255,6 +263,18 @@ export function EditorControls({
           </Button>
         </div>
       </ControlGroup>
+
+      {multiProfile && (
+        <ControlGroup title="ほかの出力サイズへ" icon="layers">
+          <Button variant="ghost" size="sm" className="w-full" onClick={onApplyToAll}>
+            <Icon name="duplicate" size={15} />
+            この調整を全サイズに適用
+          </Button>
+          <p className="mt-2 text-[11px] leading-[1.5] text-text-3">
+            出力サイズごとに個別調整できます。まとめて揃えたいときだけ使ってください。
+          </p>
+        </ControlGroup>
+      )}
     </>
   );
 }

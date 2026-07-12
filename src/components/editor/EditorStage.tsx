@@ -12,6 +12,8 @@ import type { ImageItem, OutputSettings, Transform } from "@/lib/types";
 export interface EditorStageProps {
   item: ImageItem;
   settings: OutputSettings;
+  /** 選択中プロファイルの解決済みトランスフォーム */
+  transform: Transform;
   onTransform: (patch: Partial<Transform>) => void;
 }
 
@@ -38,10 +40,10 @@ const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
  * ドラッグで画像がカーソルに追従するよう focus を更新し、ホイールで zoom、
  * ダブルクリックで focus を中央（0.5/0.5）へ戻す。位置はサイズ非依存で全プロファイルへ波及する。
  */
-export function EditorStage({ item, settings, onTransform }: EditorStageProps) {
-  const { stageRef, backdropRef, frame } = useFittedCanvas(item, settings);
+export function EditorStage({ item, settings, transform, onTransform }: EditorStageProps) {
+  const { stageRef, backdropRef, frame } = useFittedCanvas(item, settings, transform);
   const dragRef = useRef<DragState | null>(null);
-  const t = item.transform;
+  const t = transform;
   const iw = item.naturalWidth;
   const ih = item.naturalHeight;
 

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { FittedThumb } from "@/components/ui/FittedThumb";
 import { Icon } from "@/components/ui/Icon";
 import { shapeRadiusCSS } from "@/lib/fit";
+import { resolveTransform } from "@/lib/types";
 import type { ImageItem, OutputSettings } from "@/lib/types";
 
 import { StatusBadge } from "./StatusBadge";
@@ -12,13 +13,15 @@ export interface ImageRowProps {
   item: ImageItem;
   index: number;
   settings: OutputSettings;
+  /** 代表プロファイルID（サムネの解決用） */
+  repProfileId: string;
   onEdit: (id: string) => void;
   onReset: (id: string) => void;
   onRemove: (id: string) => void;
 }
 
 /** リスト表示の1行（仕様書 §5.3 `.row-item`） */
-export function ImageRow({ item, index, settings, onEdit, onReset, onRemove }: ImageRowProps) {
+export function ImageRow({ item, index, settings, repProfileId, onEdit, onReset, onRemove }: ImageRowProps) {
   const frameStyle = {
     aspectRatio: `${settings.width} / ${settings.height}`,
     borderRadius: shapeRadiusCSS(
@@ -44,7 +47,7 @@ export function ImageRow({ item, index, settings, onEdit, onReset, onRemove }: I
         <FittedThumb
           element={item.element}
           settings={settings}
-          transform={item.transform}
+          transform={resolveTransform(item, repProfileId)}
           maxDim={180}
         />
       </div>

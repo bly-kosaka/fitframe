@@ -10,6 +10,7 @@ import JSZip from "jszip";
 import { renderToCanvas } from "./fit";
 import { resolveBaseName, resolveExtension, sanitizeLabel } from "./filename";
 import { toSettings } from "./presets";
+import { resolveTransform } from "./types";
 import type { ExportResult, ImageItem, OutputConfig, OutputProfile, OutputSettings } from "./types";
 
 function canvasToBlob(canvas: HTMLCanvasElement, settings: OutputSettings): Promise<Blob> {
@@ -159,7 +160,7 @@ export async function exportSingle(
   const [entry] = planOutputs(items, config);
   const item = items.find((im) => im.id === entry.id)!;
   const canvas = document.createElement("canvas");
-  renderToCanvas(canvas, item.element, entry.settings, item.transform);
+  renderToCanvas(canvas, item.element, entry.settings, resolveTransform(item, entry.profileId));
   const blob = await canvasToBlob(canvas, entry.settings);
   const result: ExportResult = {
     id: entry.id,
@@ -189,7 +190,7 @@ export async function exportZip(
     const entry = entries[i];
     const item = byId.get(entry.id);
     if (!item) continue;
-    renderToCanvas(canvas, item.element, entry.settings, item.transform);
+    renderToCanvas(canvas, item.element, entry.settings, resolveTransform(item, entry.profileId));
     const blob = await canvasToBlob(canvas, entry.settings);
     zip.file(entry.path, blob);
 

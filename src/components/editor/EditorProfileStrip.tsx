@@ -4,6 +4,7 @@ import { FittedThumb } from "@/components/ui/FittedThumb";
 import { STRIP_THUMB_MAX_DIM } from "@/lib/constants";
 import { shapeRadiusCSS } from "@/lib/fit";
 import { toSettings } from "@/lib/presets";
+import { isProfileEdited, resolveTransform } from "@/lib/types";
 import type { GlobalOutputSettings, ImageItem, OutputProfile } from "@/lib/types";
 
 export interface EditorProfileStripProps {
@@ -35,17 +36,24 @@ export function EditorProfileStrip({
         {profiles.map((p) => {
           const s = toSettings(global, p);
           const on = p.id === selectedId;
+          const edited = isProfileEdited(item, p.id);
           return (
             <button
               key={p.id}
               type="button"
               onClick={() => onSelect(p.id)}
-              className={`flex flex-none flex-col items-center gap-1 rounded-md border p-1.5 transition-[border-color,box-shadow] duration-150 ${
+              className={`relative flex flex-none flex-col items-center gap-1 rounded-md border p-1.5 transition-[border-color,box-shadow] duration-150 ${
                 on
                   ? "border-accent shadow-[inset_0_0_0_1px_theme(colors.accent.DEFAULT)]"
                   : "border-border hover:border-border-strong"
               }`}
             >
+              {edited && (
+                <span
+                  className="absolute right-1 top-1 z-10 h-2 w-2 rounded-full bg-accent ring-2 ring-surface"
+                  title="このサイズは個別調整済み"
+                />
+              )}
               <div
                 className="checker h-[54px] overflow-hidden border border-border/60"
                 style={{
@@ -57,7 +65,7 @@ export function EditorProfileStrip({
                 <FittedThumb
                   element={item.element}
                   settings={s}
-                  transform={item.transform}
+                  transform={resolveTransform(item, p.id)}
                   maxDim={STRIP_THUMB_MAX_DIM}
                 />
               </div>
